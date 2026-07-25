@@ -4,10 +4,19 @@
 
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
+
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+);
+
+jest.mock('../src/navigation/RootNavigator', () => ({
+  RootNavigator: () => null,
+}));
+
 import App from '../App';
 
 test('renders correctly', async () => {
-  await ReactTestRenderer.act(() => {
+  await ReactTestRenderer.act(async () => {
     ReactTestRenderer.create(<App />);
   });
 });
