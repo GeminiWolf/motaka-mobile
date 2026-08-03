@@ -22,6 +22,7 @@ type SheetKind = 'makes' | 'models' | 'years';
 
 export function AddVehicleScreen({navigation}: Props) {
   const apiBaseUrl = useGarageStore(s => s.settings.apiBaseUrl);
+  const region = useGarageStore(s => s.settings.region);
   const addVehicle = useGarageStore(s => s.addVehicle);
 
   const [makes, setMakes] = useState<Make[]>([]);
@@ -43,7 +44,7 @@ export function AddVehicleScreen({navigation}: Props) {
     let cancelled = false;
     setLoadingMakes(true);
     setError('');
-    getMakes(apiBaseUrl)
+    getMakes(apiBaseUrl, region)
       .then(data => {
         if (!cancelled) {
           setMakes(data);
@@ -63,7 +64,7 @@ export function AddVehicleScreen({navigation}: Props) {
     return () => {
       cancelled = true;
     };
-  }, [apiBaseUrl]);
+  }, [apiBaseUrl, region]);
 
   useEffect(() => {
     if (!selectedMake) {

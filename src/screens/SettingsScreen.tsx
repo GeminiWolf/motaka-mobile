@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Pressable,
   ScrollView,
   StyleSheet,
   Switch,
@@ -9,6 +10,7 @@ import {
 } from 'react-native';
 import { Button } from '../components/common/Button';
 import { Chip } from '../components/common/Chip';
+import { SearchableBottomSheet } from '../components/common/SearchableBottomSheet';
 import { probeApiHealth } from '../services/api';
 import { useGarageStore } from '../store/garageStore';
 import type { CurrencyCode } from '../types';
@@ -17,9 +19,15 @@ import { Badge, type BadgeTone } from '../components/common/Badge';
 import { Card } from '../components/common/Card';
 import { Text } from '../components/common/Text';
 import { Input } from '../components/common/Input';
+import { regionOptions } from '../utils/constants';
 import { withOpacity } from '../utils/withOpacity';
 
 const CURRENCIES: CurrencyCode[] = ['ZAR', 'USD', 'EUR'];
+
+const REGION_SHEET_OPTIONS = regionOptions.map(option => ({
+  key: option.value,
+  label: option.label,
+}));
 
 type ProbeState = 'idle' | 'checking' | 'ok' | 'fail';
 
@@ -39,6 +47,12 @@ export function SettingsScreen() {
   const [apiUrlDraft, setApiUrlDraft] = useState(settings.apiBaseUrl);
   const [tokenDraft, setTokenDraft] = useState(settings.apiBearerToken);
   const [probe, setProbe] = useState<ProbeState>('idle');
+
+  const [openRegionSheet, setOpenRegionSheet] = useState(false);
+
+  const regionLabel =
+    regionOptions.find(option => option.value === settings.region)?.label ??
+    settings.region;
 
   useEffect(() => {
     setApiUrlDraft(settings.apiBaseUrl);
@@ -83,6 +97,20 @@ export function SettingsScreen() {
               />
             ))}
           </View>
+        </Card>
+
+        <Card gap="md">
+          <Text tone="white">Region</Text>
+          <Pressable
+            style={styles.flex}
+            onPress={() => setOpenRegionSheet(true)}
+            accessibilityRole="button"
+            accessibilityLabel={`Region, ${regionLabel}`}
+          >
+            <Card backgroundColor="surface" bordered>
+              <Text tone="white">{regionLabel}</Text>
+            </Card>
+          </Pressable>
         </Card>
 
         <Card gap="md">
@@ -174,6 +202,16 @@ export function SettingsScreen() {
           </View>
         </Card>
       </ScrollView>
+
+      <SearchableBottomSheet
+        visible={openRegionSheet}
+        title="Region"
+        options={REGION_SHEET_OPTIONS}
+        selectedKey={settings.region}
+        searchable={false}
+        onClose={() => setOpenRegionSheet(false)}
+        onSelect={option => updateSettings({ region: option.key })}
+      />
     </View>
   );
 }

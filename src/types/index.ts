@@ -30,6 +30,7 @@ export type TrackedPart = {
 
 export type AppSettings = {
   currency: CurrencyCode;
+  region: string;
   monthlyBudget: number;
   apiBaseUrl: string;
   apiBearerToken: string;

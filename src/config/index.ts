@@ -13,6 +13,7 @@ export function getDefaultSettings(): AppSettings {
   return {
     currency: 'ZAR',
     monthlyBudget: 2000,
+    region: 'AF',
     apiBaseUrl: getDefaultApiBaseUrl(),
     apiBearerToken: '',
     notificationsEnabled: false,

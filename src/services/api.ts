@@ -154,10 +154,11 @@ async function request<T>(
   return response.json() as Promise<T>;
 }
 
-export function getMakes(baseUrl: string): Promise<Make[]> {
-  return request<ApiMake[]>(baseUrl, '/vehicles/makes').then(rows =>
-    rows.map(mapMake),
-  );
+export function getMakes(baseUrl: string, region: string): Promise<Make[]> {
+  return request<ApiMake[]>(
+    baseUrl,
+    `/vehicles/makes?region=${encodeURIComponent(region)}`,
+  ).then(rows => rows.map(mapMake));
 }
 
 export function getModels(baseUrl: string, makeId: string): Promise<Model[]> {
