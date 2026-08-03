@@ -4,10 +4,10 @@ import { BottomTabHeaderProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '../../components/common/Text';
 import { colors, spacing } from '../../theme';
-import MotakaIcon from '../../assets/MotakaIcon';
 import { Badge } from '@react-navigation/elements';
 import { Button } from '../../components/common/Button';
 import { PlusIcon } from 'lucide-react-native';
+import GarageForgeIcon from '../../assets/GarageForgeIcon';
 
 type HeaderProps = BottomTabHeaderProps;
 
@@ -37,13 +37,13 @@ export default function Header({ route, navigation }: HeaderProps) {
   return (
     <View style={[styles.container, { paddingTop: top }]}>
       <View style={[styles.row, { gap: spacing.sm }]}>
-        <MotakaIcon
+        <GarageForgeIcon
           size={32}
           color={colors.bg}
           backgroundColor={colors.accent}
         />
         <Text size="2xl" weight="bold" tone="accent">
-          Motaka
+          GarageForge
         </Text>
         <Badge visible={false} size={12} style={styles.badge}>
           PRO

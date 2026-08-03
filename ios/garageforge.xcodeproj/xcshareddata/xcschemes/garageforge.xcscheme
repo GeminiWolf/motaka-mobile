@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "motaka.app"
-               BlueprintName = "motaka"
-               ReferencedContainer = "container:motaka.xcodeproj">
+               BuildableName = "garageforge.app"
+               BlueprintName = "garageforge"
+               ReferencedContainer = "container:garageforge.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "motakaTests.xctest"
-               BlueprintName = "motakaTests"
-               ReferencedContainer = "container:motaka.xcodeproj">
+               BuildableName = "garageforgeTests.xctest"
+               BlueprintName = "garageforgeTests"
+               ReferencedContainer = "container:garageforge.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "motaka.app"
-            BlueprintName = "motaka"
-            ReferencedContainer = "container:motaka.xcodeproj">
+            BuildableName = "garageforge.app"
+            BlueprintName = "garageforge"
+            ReferencedContainer = "container:garageforge.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "motaka.app"
-            BlueprintName = "motaka"
-            ReferencedContainer = "container:motaka.xcodeproj">
+            BuildableName = "garageforge.app"
+            BlueprintName = "garageforge"
+            ReferencedContainer = "container:garageforge.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

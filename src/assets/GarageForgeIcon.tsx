@@ -1,13 +1,13 @@
 import * as React from 'react';
 import Svg, { SvgProps, ClipPath, Path, G } from 'react-native-svg';
 
-type MotakaIcomProps = SvgProps & {
+type GarageForgeIcomProps = SvgProps & {
   size?: number;
   color?: string;
   backgroundColor?: string;
 };
 
-const MotakaIcon = (props: MotakaIcomProps) => (
+const GarageForgeIcon = (props: GarageForgeIcomProps) => (
   <Svg
     width={props.size || 667}
     viewBox="0 0 667 667"
@@ -37,4 +37,4 @@ const MotakaIcon = (props: MotakaIcomProps) => (
     </G>
   </Svg>
 );
-export default MotakaIcon;
+export default GarageForgeIcon;

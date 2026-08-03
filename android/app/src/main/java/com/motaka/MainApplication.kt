@@ -1,4 +1,4 @@
-package com.motaka
+package com.garageforge
 
 import android.app.Application
 import com.facebook.react.PackageList

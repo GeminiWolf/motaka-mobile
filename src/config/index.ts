@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import type { AppSettings } from '../types';
 
-export const STORAGE_KEY = 'motaka.garage.v1';
+export const STORAGE_KEY = 'garageforge.v1';
 
 export function getDefaultApiBaseUrl(): string {
   return Platform.OS === 'android'
