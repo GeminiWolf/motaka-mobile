@@ -13,6 +13,7 @@ export type GarageStackParamList = {
   PartsTracker: { vehicleId: string };
   AddPart: { vehicleId: string };
   PartDetail: { partId: string };
+  PartsChecklist: { vehicleId: string };
   FindPart: {
     vehicleId: string;
     partNumber?: string;

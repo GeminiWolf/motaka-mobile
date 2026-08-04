@@ -18,6 +18,9 @@ import { SettingsScreen } from '../screens/SettingsScreen';
 import { colors } from '../theme';
 import Header from './components/Header';
 import { CarDashboardHeaderRight } from './components/CarDashboardHeaderRight';
+import { PartsChecklistHeaderRight } from './components/PartsChecklistHeaderRight';
+import { PartsChecklistHeaderTitle } from './components/PartsChecklistHeaderTitle';
+import { PartsChecklistScreen } from '../screens/PartsChecklistScreen';
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const GarageStack = createNativeStackNavigator<GarageStackParamList>();
@@ -152,6 +155,17 @@ export function RootNavigator() {
             contentStyle: { backgroundColor: 'transparent' },
             gestureDirection: 'vertical',
           }}
+        />
+        <GarageStack.Screen
+          name="PartsChecklist"
+          component={PartsChecklistScreen}
+          options={({ navigation, route }) => ({
+            title: '',
+            headerTitleAlign: 'left',
+            headerStyle: { backgroundColor: colors.surface },
+            headerTitle: () => PartsChecklistHeaderTitle({ route }),
+            headerRight: () => PartsChecklistHeaderRight({ navigation, route }),
+          })}
         />
         <GarageStack.Screen
           name="PartDetail"

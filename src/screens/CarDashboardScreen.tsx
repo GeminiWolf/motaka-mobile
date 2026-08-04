@@ -17,6 +17,7 @@ import { Text } from '../components/common/Text';
 import { getBudgetParts, sumEstimatedCost } from '../utils/budgetPlanner';
 import { withOpacity } from '../utils/withOpacity';
 import { ListChecks, PlusCircle, Trash } from 'lucide-react-native';
+import { statusFromChecklistChecked } from '../utils/partsChecklistStatus';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'CarDashboard'>;
 
@@ -24,9 +25,9 @@ export function CarDashboardScreen({ navigation, route }: Props) {
   const { vehicleId } = route.params;
   const vehicle = useGarageStore(s => s.vehicles.find(v => v.id === vehicleId));
   const trackedParts = useGarageStore(s => s.trackedParts);
+  const updateTrackedPart = useGarageStore(s => s.updateTrackedPart);
   const settings = useGarageStore(s => s.settings);
   const removeVehicle = useGarageStore(s => s.removeVehicle);
-
   const parts = useMemo(
     () => trackedParts.filter(p => p.vehicleId === vehicleId),
     [trackedParts, vehicleId],
@@ -42,11 +43,7 @@ export function CarDashboardScreen({ navigation, route }: Props) {
   const overBy = totalNeeded - monthlyCap;
   const isOverCap = overBy > 0;
 
-  const checklist = useMemo(() => prioritizeParts(parts), [parts]);
-  const neededCount = useMemo(
-    () => parts.filter(p => p.status === 'needed').length,
-    [parts],
-  );
+  const checklist = useMemo(() => prioritizeParts(parts).slice(0, 3), [parts]);
 
   const handleRemoveVehicle = () => {
     Alert.alert(
@@ -57,6 +54,10 @@ export function CarDashboardScreen({ navigation, route }: Props) {
         { text: 'Remove', onPress: () => removeVehicle(vehicleId) },
       ],
     );
+  };
+
+  const handlePartCheckedChange = (partId: string, checked: boolean) => {
+    updateTrackedPart(partId, { status: statusFromChecklistChecked(checked) });
   };
 
   if (!vehicle) {
@@ -136,7 +137,11 @@ export function CarDashboardScreen({ navigation, route }: Props) {
               weight="semibold"
             >{`Parts Checklist (${checklist.length})`}</Text>
           </View>
-          <Text tone="dim">{`${neededCount} needed`}</Text>
+          <Pressable
+            onPress={() => navigation.navigate('PartsChecklist', { vehicleId })}
+          >
+            <Text tone="dim">View All</Text>
+          </Pressable>
         </View>
         <FlatList
           keyExtractor={item => item.id}
@@ -147,6 +152,11 @@ export function CarDashboardScreen({ navigation, route }: Props) {
               key={item.id}
               part={item}
               currency={currency}
+              checkbox
+              checked={item.status === 'installed'}
+              onCheckedChange={checked =>
+                handlePartCheckedChange(item.id, checked)
+              }
               onPress={() =>
                 navigation.navigate('PartDetail', { partId: item.id })
               }

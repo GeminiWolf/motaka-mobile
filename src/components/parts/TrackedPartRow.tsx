@@ -35,7 +35,7 @@ export function TrackedPartRow({
       accessibilityLabel={`${part.name}, part number ${part.partNumber}, ${part.priority} priority, ${part.status}, estimated ${cost}`}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
-      <View>
+      <View style={styles.body}>
         {checkbox ? (
           <View style={styles.checkbox}>
             <Checkbox
@@ -98,6 +98,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: spacing.sm,
     flexDirection: 'row',
+    alignItems: 'center',
   },
   name: {
     ...typography.subtitle,
