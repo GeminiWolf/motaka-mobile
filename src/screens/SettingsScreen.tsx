@@ -233,7 +233,7 @@ export function SettingsScreen() {
           </Card>
         </View>
 
-        <View style={styles.cardGap}>
+        <View style={[styles.cardGap, __DEV__ && styles.hidden]}>
           <Text size="xs" tone="dim" weight="bold">
             API & CONNECTION
           </Text>
