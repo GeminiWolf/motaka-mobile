@@ -1,6 +1,7 @@
 export type PartPriority = 'urgent' | 'soon' | 'someday';
 export type PartStatus = 'needed' | 'sourcing' | 'ordered' | 'installed';
 export type CurrencyCode = 'ZAR' | 'USD' | 'EUR';
+export type UnitSystem = 'metric' | 'imperial';
 
 export type Vehicle = {
   id: string;
@@ -30,8 +31,14 @@ export type TrackedPart = {
 
 export type AppSettings = {
   currency: CurrencyCode;
+  units: UnitSystem;
   region: string;
   monthlyBudget: number;
+  budgetRollover: boolean;
+  budgetCarryOver: number;
+  budgetPeriodKey: string;
+  budgetPeriodCommittedBaseline: number;
+  spendingAlertThreshold: number;
   apiBaseUrl: string;
   apiBearerToken: string;
   notificationsEnabled: boolean;

@@ -21,6 +21,11 @@ import { CarDashboardHeaderRight } from './components/CarDashboardHeaderRight';
 import { PartsChecklistHeaderRight } from './components/PartsChecklistHeaderRight';
 import { PartsChecklistHeaderTitle } from './components/PartsChecklistHeaderTitle';
 import { PartsChecklistScreen } from '../screens/PartsChecklistScreen';
+import DataAndStorageScreen from '../screens/DataAndStorageScreen';
+import ExportScreen from '../screens/ExportScreen';
+import AboutScreen from '../screens/AboutScreen';
+import LicensesScreen from '../screens/LicensesScreen';
+import ApiConnectionScreen from '../screens/ApiConnectionScreen';
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const GarageStack = createNativeStackNavigator<GarageStackParamList>();
@@ -181,6 +186,40 @@ export function RootNavigator() {
           name="BudgetCar"
           component={BudgetCarScreen}
           options={{ title: 'Budget' }}
+        />
+        <GarageStack.Screen
+          name="DataAndStorage"
+          component={DataAndStorageScreen}
+          options={{ title: 'Data & Storage' }}
+        />
+        <GarageStack.Screen
+          name="Export"
+          component={ExportScreen}
+          options={{ title: 'Export' }}
+        />
+        <GarageStack.Screen
+          name="About"
+          component={AboutScreen}
+          options={{
+            title: '',
+            headerStyle: { backgroundColor: colors.bg },
+          }}
+        />
+        <GarageStack.Screen
+          name="Licenses"
+          component={LicensesScreen}
+          options={{
+            title: 'Licenses',
+            headerStyle: { backgroundColor: colors.bg },
+          }}
+        />
+        <GarageStack.Screen
+          name="ApiConnection"
+          component={ApiConnectionScreen}
+          options={{
+            title: 'API Connection',
+            headerStyle: { backgroundColor: colors.bg },
+          }}
         />
       </GarageStack.Navigator>
     </NavigationContainer>

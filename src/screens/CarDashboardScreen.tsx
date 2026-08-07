@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Button } from '../components/common/Button';
+import { ListChecks, Trash } from 'lucide-react-native';
+
 import { EmptyState } from '../components/common/EmptyState';
 import { Screen } from '../components/common/Screen';
 import { TrackedPartRow } from '../components/parts/TrackedPartRow';
@@ -14,10 +15,9 @@ import { Badge } from '../components/common/Badge';
 import { formatMoney } from '../utils/formatMoney';
 import { ProgressBar } from '../components/common/ProgressBar';
 import { Text } from '../components/common/Text';
-import { getBudgetParts, sumEstimatedCost } from '../utils/budgetPlanner';
 import { withOpacity } from '../utils/withOpacity';
-import { ListChecks, PlusCircle, Trash } from 'lucide-react-native';
 import { statusFromChecklistChecked } from '../utils/partsChecklistStatus';
+import { useBudgetOverview } from '../hooks/useBudgetOverview';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'CarDashboard'>;
 
@@ -33,15 +33,17 @@ export function CarDashboardScreen({ navigation, route }: Props) {
     [trackedParts, vehicleId],
   );
 
-  const totalNeeded = useMemo(
-    () => sumEstimatedCost(getBudgetParts(parts)),
-    [parts],
-  );
+  const {
+    totalNeeded,
+    monthlyCap,
+    overBy,
+    isOverCap,
+    isSpendingAlert,
+    usagePercent,
+  } = useBudgetOverview(parts);
 
-  const monthlyCap = settings.monthlyBudget;
   const currency = settings.currency;
-  const overBy = totalNeeded - monthlyCap;
-  const isOverCap = overBy > 0;
+  const statusTone = isOverCap || isSpendingAlert ? 'warning' : 'accent';
 
   const checklist = useMemo(() => prioritizeParts(parts).slice(0, 3), [parts]);
 
@@ -106,25 +108,25 @@ export function CarDashboardScreen({ navigation, route }: Props) {
           <ProgressBar
             value={totalNeeded}
             max={monthlyCap}
+            warning={isSpendingAlert && !isOverCap}
             accessibilityLabel="Budget used versus total cap"
           />
           <View style={[styles.row, styles.spaceBetween]}>
             <Text size="sm">
               Total Cap: {formatMoney(monthlyCap, currency)}
             </Text>
-            <Text size="sm" tone={isOverCap ? 'warning' : 'accent'}>
+            <Text size="sm" tone={statusTone}>
               {isOverCap
                 ? `${formatMoney(overBy, currency)} over monthly cap`
                 : `${formatMoney(-overBy, currency)} remaining`}
             </Text>
           </View>
+          {isSpendingAlert && !isOverCap ? (
+            <Text size="sm" tone="warning">
+              Spending alert: used {Math.round(usagePercent)}% of your budget
+            </Text>
+          ) : null}
         </Card>
-        <Button
-          label="Add needed Part"
-          radius="lg"
-          onPress={() => navigation.navigate('AddPart', { vehicleId })}
-          leftIcon={<PlusCircle size={16} color={colors.slate500} />}
-        />
       </Card>
 
       <View style={styles.checklist}>

@@ -1,13 +1,24 @@
 {
   "name": "garageforge",
-  "version": "0.0.1",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "version:patch": "node scripts/bump-version.js patch",
+    "version:minor": "node scripts/bump-version.js minor",
+    "version:major": "node scripts/bump-version.js major",
+    "version:set": "node scripts/bump-version.js set",
+    "version:build": "node scripts/bump-version.js build",
+    "version:sync": "node scripts/bump-version.js sync",
+    "build:android": "cd android && ./gradlew assembleRelease",
+    "build:android:apk": "cd android && ./gradlew assembleRelease",
+    "build:android:aab": "cd android && ./gradlew bundleRelease",
+    "build:ios": "xcodebuild -workspace ios/garageforge.xcworkspace -scheme garageforge -configuration Release -sdk iphoneos -archivePath build/GarageForge.xcarchive archive",
+    "clean:android": "cd android && ./gradlew clean"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^3.1.1",
@@ -19,8 +30,10 @@
     "lucide-react-native": "^1.25.0",
     "react": "19.2.3",
     "react-native": "0.86.0",
+    "react-native-blob-util": "^0.24.10",
     "react-native-safe-area-context": "^5.8.0",
     "react-native-screens": "^4.26.2",
+    "react-native-share": "^12.3.1",
     "react-native-svg": "^15.15.5",
     "zustand": "^5.0.14"
   },

@@ -9,6 +9,7 @@ type Props = {
   height?: number;
   color?: string;
   trackColor?: string;
+  warning?: boolean;
   style?: ViewStyle;
   accessibilityLabel?: string;
 };
@@ -19,11 +20,14 @@ export function ProgressBar({
   height = 8,
   color,
   trackColor = colors.slate600,
+  warning = false,
   style,
   accessibilityLabel = 'Progress',
 }: Props) {
   const { fill, isOver } = getProgressBarState(value, max);
-  const fillColor = color ?? (isOver ? colors.danger : colors.accent);
+  const fillColor =
+    color ??
+    (isOver ? colors.danger : warning ? colors.warning : colors.accent);
 
   return (
     <View

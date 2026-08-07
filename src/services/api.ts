@@ -1,3 +1,5 @@
+import ReactNativeBlobUtil from 'react-native-blob-util';
+
 import type {
   CatalogPart,
   Make,
@@ -5,6 +7,12 @@ import type {
   ModelYear,
   PartCategory,
 } from '../types';
+import type { GarageExportPayload } from '../utils/garageExport';
+import {
+  arrayBufferToBase64,
+  buildVehicleExportFilename,
+  parseContentDispositionFilename,
+} from '../utils/garageExport';
 
 export class ApiError extends Error {
   status?: number;
@@ -201,11 +209,90 @@ export function getParts(
   ).then(rows => rows.map(mapPart));
 }
 
-export async function probeApiHealth(baseUrl: string): Promise<boolean> {
+export async function probeApiHealth(
+  baseUrl: string,
+  bearerToken?: string,
+): Promise<boolean> {
   try {
-    const result = await request<{ok: boolean}>(baseUrl, '/health');
+    const token =
+      bearerToken !== undefined
+        ? normalizeBearerToken(bearerToken)
+        : apiBearerToken;
+    const url = `${baseUrl.replace(/\/$/, '')}/health`;
+    const headers: Record<string, string> = { Accept: 'application/json' };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    const response = await fetch(url, { headers });
+    if (!response.ok) {
+      return false;
+    }
+    const result = (await response.json()) as {ok?: boolean};
     return result.ok === true;
   } catch {
     return false;
   }
+}
+
+export type VehiclePdfExportResult = {
+  path: string;
+  filename: string;
+};
+
+export async function exportVehiclePdf(
+  baseUrl: string,
+  payload: GarageExportPayload,
+): Promise<VehiclePdfExportResult> {
+  const vehicle = payload.vehicles[0];
+  if (vehicle == null) {
+    throw new ApiError('Export requires at least one vehicle.');
+  }
+
+  const fallbackFilename = buildVehicleExportFilename(vehicle);
+  const url = `${baseUrl.replace(/\/$/, '')}/vehicles/export`;
+  const body = JSON.stringify(payload);
+  const headers = buildRequestHeaders({ body });
+  headers.Accept = 'application/pdf';
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    });
+  } catch {
+    throw new ApiError('Unable to reach API. Check the base URL and network.');
+  }
+
+  if (!response.ok) {
+    let message = `Request failed (${response.status})`;
+    try {
+      const errorBody = await response.json();
+      if (errorBody?.message) {
+        message = Array.isArray(errorBody.message)
+          ? errorBody.message.join(', ')
+          : String(errorBody.message);
+      } else if (errorBody?.error) {
+        message = String(errorBody.error);
+      }
+    } catch {
+      // ignore parse errors
+    }
+    throw new ApiError(message, response.status);
+  }
+
+  const filename =
+    parseContentDispositionFilename(
+      response.headers.get('content-disposition'),
+    ) ?? fallbackFilename;
+  const buffer = await response.arrayBuffer();
+  const path = `${ReactNativeBlobUtil.fs.dirs.CacheDir}/${filename}`;
+  await ReactNativeBlobUtil.fs.writeFile(
+    path,
+    arrayBufferToBase64(buffer),
+    'base64',
+  );
+
+  return { path, filename };
 }

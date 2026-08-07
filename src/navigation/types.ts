@@ -21,6 +21,11 @@ export type GarageStackParamList = {
     catalogPartId?: string;
   };
   BudgetCar: { vehicleId: string };
+  DataAndStorage: undefined;
+  Export: undefined;
+  About: undefined;
+  Licenses: undefined;
+  ApiConnection: undefined;
 };
 
 declare global {

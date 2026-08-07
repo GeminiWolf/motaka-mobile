@@ -7,6 +7,7 @@ import {MonthPlan} from '../components/budget/MonthPlan';
 import {EmptyState} from '../components/common/EmptyState';
 import {Screen} from '../components/common/Screen';
 import type {GarageStackParamList} from '../navigation/types';
+import {useBudgetOverview} from '../hooks/useBudgetOverview';
 import {useGarageStore} from '../store/garageStore';
 import {formatMoney} from '../utils/formatMoney';
 import {colors, radius, spacing, typography} from '../theme';
@@ -25,6 +26,7 @@ export function BudgetCarScreen({navigation, route}: Props) {
     () => trackedParts.filter(p => p.vehicleId === vehicleId),
     [trackedParts, vehicleId],
   );
+  const {monthlyCap} = useBudgetOverview(parts);
 
   if (!vehicle) {
     return (
@@ -50,7 +52,7 @@ export function BudgetCarScreen({navigation, route}: Props) {
       <View style={styles.budgetNote}>
         <Text style={styles.budgetLabel}>Monthly garage budget</Text>
         <Text style={styles.budgetValue}>
-          {formatMoney(settings.monthlyBudget, settings.currency)}
+          {formatMoney(monthlyCap, settings.currency)}
         </Text>
         <Text style={styles.budgetHint}>
           Edit this amount on the Budget tab or in Settings. It applies to all
@@ -59,7 +61,7 @@ export function BudgetCarScreen({navigation, route}: Props) {
       </View>
       <BudgetSummary
         parts={parts}
-        monthlyBudget={settings.monthlyBudget}
+        monthlyBudget={monthlyCap}
         currency={settings.currency}
       />
       <MonthPlan parts={parts} currency={settings.currency} />

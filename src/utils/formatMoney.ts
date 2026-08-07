@@ -13,10 +13,26 @@ function formatAmount(amount: number): string {
   return decPart != null ? `${withCommas}.${decPart}` : withCommas;
 }
 
+export function getCurrencySymbol(currency: CurrencyCode = 'ZAR'): string {
+  return SYMBOLS[currency];
+}
+
 export function formatMoney(
   amount: number,
   currency: CurrencyCode = 'ZAR',
 ): string {
   const safe = Number.isFinite(amount) ? amount : 0;
   return `${SYMBOLS[currency]}${formatAmount(safe)}`;
+}
+
+export function parseMonthlyBudget(value: string): number | null {
+  const cleaned = value.trim().replace(/,/g, '');
+  if (cleaned === '') {
+    return null;
+  }
+  const amount = Number(cleaned);
+  if (!Number.isFinite(amount) || amount < 0) {
+    return null;
+  }
+  return Math.round(amount * 100) / 100;
 }

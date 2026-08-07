@@ -14,15 +14,12 @@ import type {
   GarageStackParamList,
   RootTabParamList,
 } from '../navigation/types';
+import { useBudgetOverview } from '../hooks/useBudgetOverview';
 import { useGarageStore } from '../store/garageStore';
 import { colors, spacing } from '../theme';
 import { Paperclip } from 'lucide-react-native';
 import BudgetPartItem from '../components/budget/BudgetPartItem';
-import {
-  getBudgetParts,
-  suggestBuyOrder,
-  sumEstimatedCost,
-} from '../utils/budgetPlanner';
+import { suggestBuyOrder } from '../utils/budgetPlanner';
 import { formatMoney } from '../utils/formatMoney';
 
 type Nav = CompositeNavigationProp<
@@ -36,21 +33,16 @@ export function BudgetScreen() {
   const trackedParts = useGarageStore(s => s.trackedParts);
   const settings = useGarageStore(s => s.settings);
   const updateSettings = useGarageStore(s => s.updateSettings);
+  const { totalNeeded, monthlyCap, overBy, isOverCap, isSpendingAlert, usagePercent } =
+    useBudgetOverview(trackedParts);
 
   const neededParts = useMemo(
     () => suggestBuyOrder(trackedParts),
     [trackedParts],
   );
 
-  const totalNeeded = useMemo(
-    () => sumEstimatedCost(getBudgetParts(trackedParts)),
-    [trackedParts],
-  );
-
-  const monthlyCap = settings.monthlyBudget;
   const currency = settings.currency;
-  const overBy = totalNeeded - monthlyCap;
-  const isOverCap = overBy > 0;
+  const statusTone = isOverCap || isSpendingAlert ? 'warning' : 'accent';
 
   const vehicleLabelById = useMemo(() => {
     const map = new Map<string, string>();
@@ -101,18 +93,24 @@ export function BudgetScreen() {
             <ProgressBar
               value={totalNeeded}
               max={monthlyCap}
+              warning={isSpendingAlert && !isOverCap}
               accessibilityLabel="Budget used versus total cap"
             />
             <View style={[styles.row, styles.spaceBetween]}>
               <Text size="sm">
                 Total Cap: {formatMoney(monthlyCap, currency)}
               </Text>
-              <Text size="sm" tone={isOverCap ? 'warning' : 'accent'}>
+              <Text size="sm" tone={statusTone}>
                 {isOverCap
                   ? `${formatMoney(overBy, currency)} over monthly cap`
                   : `${formatMoney(-overBy, currency)} remaining`}
               </Text>
             </View>
+            {isSpendingAlert && !isOverCap ? (
+              <Text size="sm" tone="warning">
+                Spending alert: used {Math.round(usagePercent)}% of your budget
+              </Text>
+            ) : null}
           </Card>
           <View style={styles.priorityQueueContainer}>
             <View style={styles.row}>
