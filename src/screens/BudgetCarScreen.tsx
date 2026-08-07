@@ -1,23 +1,23 @@
-import React, {useMemo} from 'react';
-import {StyleSheet, View} from 'react-native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import React, { useMemo } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import {BudgetSummary} from '../components/budget/BudgetSummary';
-import {MonthPlan} from '../components/budget/MonthPlan';
-import {EmptyState} from '../components/common/EmptyState';
-import {Screen} from '../components/common/Screen';
-import type {GarageStackParamList} from '../navigation/types';
-import {useBudgetOverview} from '../hooks/useBudgetOverview';
-import {useGarageStore} from '../store/garageStore';
-import {formatMoney} from '../utils/formatMoney';
-import {colors, radius, spacing, typography} from '../theme';
+import { BudgetSummary } from '../components/budget/BudgetSummary';
+import { MonthPlan } from '../components/budget/MonthPlan';
+import { EmptyState } from '../components/common/EmptyState';
+import { Screen } from '../components/common/Screen';
+import type { GarageStackParamList } from '../navigation/types';
+import { useBudgetOverview } from '../hooks/useBudgetOverview';
+import { useGarageStore } from '../store/garageStore';
+import { formatMoney } from '../utils/formatMoney';
+import { colors, radius, spacing, typography } from '../theme';
 import { Text } from '../components/common/Text';
 import { Card } from '../components/common/Card';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'BudgetCar'>;
 
-export function BudgetCarScreen({navigation, route}: Props) {
-  const {vehicleId} = route.params;
+export function BudgetCarScreen({ navigation, route }: Props) {
+  const { vehicleId } = route.params;
   const vehicle = useGarageStore(s => s.vehicles.find(v => v.id === vehicleId));
   const trackedParts = useGarageStore(s => s.trackedParts);
   const settings = useGarageStore(s => s.settings);
@@ -26,7 +26,7 @@ export function BudgetCarScreen({navigation, route}: Props) {
     () => trackedParts.filter(p => p.vehicleId === vehicleId),
     [trackedParts, vehicleId],
   );
-  const {monthlyCap} = useBudgetOverview(parts);
+  const { monthlyCap } = useBudgetOverview(parts);
 
   if (!vehicle) {
     return (
@@ -43,12 +43,13 @@ export function BudgetCarScreen({navigation, route}: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text size='lg' tone='accent'>Budget Planner</Text>
-        <Text tone='white'>Manage monthly sourcing spend across your garage</Text>
+        <Text size="lg" tone="accent">
+          Budget Planner
+        </Text>
+        <Text tone="white">
+          Manage monthly sourcing spend across your garage
+        </Text>
       </View>
-      <Card>
-        
-      </Card>
       <View style={styles.budgetNote}>
         <Text style={styles.budgetLabel}>Monthly garage budget</Text>
         <Text style={styles.budgetValue}>

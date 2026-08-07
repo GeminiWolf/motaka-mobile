@@ -174,7 +174,7 @@ export function SettingsScreen() {
                 value={monthlyBudgetLabel}
                 onPress={openMonthlyBudgetSheet}
               />
-              <List.Item
+              {/* <List.Item
                 icon="RefreshCw"
                 label="Budget Rollover"
                 description="Carry over unused budget"
@@ -194,7 +194,7 @@ export function SettingsScreen() {
                     accessibilityLabel="Budget Rollover"
                   />
                 }
-              />
+              /> */}
               <List.Item
                 icon="Bell"
                 label="Spending Alerts"
