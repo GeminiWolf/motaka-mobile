@@ -32,7 +32,7 @@ export default function ExportScreen() {
     null,
   );
 
-  const exportVehicle = async (vehicle: Vehicle) => {
+  const runExport = async (vehicle: Vehicle) => {
     if (exportingVehicleId != null) {
       return;
     }
@@ -59,6 +59,26 @@ export default function ExportScreen() {
     } finally {
       setExportingVehicleId(null);
     }
+  };
+
+  const exportVehicle = (vehicle: Vehicle) => {
+    if (exportingVehicleId != null) {
+      return;
+    }
+
+    Alert.alert(
+      'Export vehicle',
+      'This sends this vehicle, its tracked parts, and related budget settings to the server to generate a PDF.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Export',
+          onPress: () => {
+            runExport(vehicle);
+          },
+        },
+      ],
+    );
   };
 
   return (

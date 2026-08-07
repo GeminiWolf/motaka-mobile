@@ -3,6 +3,10 @@ import type { AppSettings } from '../types';
 
 export const STORAGE_KEY = 'garageforge.v1';
 
+/** Host docs/privacy-policy.md and set this to the live HTTPS URL before store submission. */
+export const PRIVACY_POLICY_URL =
+  'https://example.com/garage-forge-privacy-policy';
+
 export function getDefaultApiBaseUrl(): string {
   if (!__DEV__) {
     return 'https://auto-v-backend-production.up.railway.app';

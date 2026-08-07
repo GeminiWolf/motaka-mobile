@@ -1,4 +1,4 @@
-package com.garageforge
+package com.garageforge.app
 import android.os.Bundle
 import com.swmansion.rnscreens.fragment.restoration.RNScreensFragmentFactory
 

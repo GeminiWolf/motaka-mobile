@@ -5,7 +5,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -227,13 +226,13 @@ export function SettingsScreen() {
                 icon="Info"
                 label="About Garage Forge"
                 description={`Version ${version}`}
-                onPress={() => navigation.navigate('About')}
+                // onPress={() => navigation.navigate('About')}
               />
             </List.View>
           </Card>
         </View>
 
-        <View style={[styles.cardGap, __DEV__ && styles.hidden]}>
+        <View style={[styles.cardGap, styles.hidden]}>
           <Text size="xs" tone="dim" weight="bold">
             API & CONNECTION
           </Text>
