@@ -96,3 +96,13 @@ Complete IARC questionnaire for a utility / vehicle maintenance tracker with no 
 - [ ] Settings → About → Privacy Policy opens the live URL
 - [ ] Confirm Licenses is not reachable from UI
 - [ ] Confirm Account / API / Data & storage are not user-facing stubs
+
+## Release notes
+
+Welcome to Garage Forge — track vehicles, parts, and your monthly garage budget in one place.
+
+Bug fixes and improvements to keep Garage Forge running smoothly.
+
+- Release signing and store readiness updates
+- Privacy Policy link in About
+- Export confirmation before sending data to generate a PDF

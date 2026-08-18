@@ -8,6 +8,8 @@ import { Input } from '../components/common/Input';
 import { Button } from '../components/common/Button';
 import { useGarageStore } from '../store/garageStore';
 import { probeApiHealth } from '../services/api';
+import { SearchableBottomSheet } from '../components/common/SearchableBottomSheet';
+import { BASE_URL_OBJ } from '../config';
 
 type ProbeState = 'idle' | 'checking' | 'ok' | 'fail';
 
@@ -24,6 +26,11 @@ const DOT_STYLE: Record<Exclude<ProbeState, 'checking'>, object> = {
   fail: { backgroundColor: colors.warning },
 };
 
+const API_SHEET_OPTIONS = Object.values(BASE_URL_OBJ).map(url => ({
+  key: url,
+  label: url,
+}));
+
 export default function ApiConnectionScreen() {
   const updateSettings = useGarageStore(s => s.updateSettings);
   const settings = useGarageStore(s => s.settings);
@@ -31,6 +38,7 @@ export default function ApiConnectionScreen() {
 
   const [apiUrlDraft, setApiUrlDraft] = useState(settings.apiBaseUrl);
   const [tokenDraft, setTokenDraft] = useState(settings.apiBearerToken);
+  const [openApiSheet, setOpenApiSheet] = useState(false);
   const [probe, setProbe] = useState<ProbeState>('idle');
 
   const runProbe = async (
@@ -65,64 +73,73 @@ export default function ApiConnectionScreen() {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      keyboardShouldPersistTaps="handled"
-    >
-      <Card gap="md" radius="md" padding="md">
-        <View style={styles.statusRow}>
-          <Text tone="white">API Connection Status</Text>
-          <Badge
-            label={PROBE_BADGE[probe].label}
-            tone={PROBE_BADGE[probe].tone}
-            leftSection={
-              probe === 'checking' ? (
-                <ActivityIndicator size="small" color={colors.info} />
-              ) : (
-                <View style={[styles.statusDot, DOT_STYLE[probe]]} />
-              )
-            }
-          />
-        </View>
+    <View style={styles.flex}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Card gap="md" radius="md" padding="md">
+          <View style={styles.statusRow}>
+            <Text tone="white">API Connection Status</Text>
+            <Badge
+              label={PROBE_BADGE[probe].label}
+              tone={PROBE_BADGE[probe].tone}
+              leftSection={
+                probe === 'checking' ? (
+                  <ActivityIndicator size="small" color={colors.info} />
+                ) : (
+                  <View style={[styles.statusDot, DOT_STYLE[probe]]} />
+                )
+              }
+            />
+          </View>
 
-        <Text>Base Endpoint</Text>
-        <Input
-          value={apiUrlDraft}
-          onChangeText={setApiUrlDraft}
-          placeholder="https://api.example.com"
-          placeholderTextColor={colors.textDim}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="url"
-        />
-
-        <Text>Bearer Token</Text>
-        <Input
-          value={tokenDraft}
-          onChangeText={setTokenDraft}
-          placeholder="Optional"
-          placeholderTextColor={colors.textDim}
-          autoCapitalize="none"
-          autoCorrect={false}
-          secureTextEntry
-        />
-
-        <View style={styles.row}>
+          <Text>Base Endpoint</Text>
           <Button
-            label="Save API"
-            onPress={saveApi}
+            label={apiUrlDraft}
+            onPress={() => setOpenApiSheet(true)}
             style={styles.flex}
-          />
-          <Button
-            label="Probe"
             variant="secondary"
-            onPress={() => runProbe(apiUrlDraft.trim(), tokenDraft.trim())}
-            style={styles.flex}
+            rightIcon="ChevronRight"
           />
-        </View>
-      </Card>
-    </ScrollView>
+
+          <Text>Bearer Token</Text>
+          <Input
+            value={tokenDraft}
+            onChangeText={setTokenDraft}
+            placeholder="Optional"
+            placeholderTextColor={colors.textDim}
+            autoCapitalize="none"
+            autoCorrect={false}
+            secureTextEntry
+          />
+
+          <View style={styles.row}>
+            <Button label="Save API" onPress={saveApi} style={styles.flex} />
+            <Button
+              label="Probe"
+              variant="secondary"
+              onPress={() => runProbe(apiUrlDraft.trim(), tokenDraft.trim())}
+              style={styles.flex}
+            />
+          </View>
+        </Card>
+      </ScrollView>
+
+      <SearchableBottomSheet
+        visible={openApiSheet}
+        title="API"
+        options={API_SHEET_OPTIONS}
+        selectedKey={settings.apiBaseUrl}
+        searchable={false}
+        onClose={() => setOpenApiSheet(false)}
+        onSelect={option => {
+          setApiUrlDraft(option.key);
+          setOpenApiSheet(false);
+        }}
+      />
+    </View>
   );
 }
 

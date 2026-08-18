@@ -6,9 +6,9 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {X} from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {colors, radius, spacing} from '../../theme';
+import ButtonIcon from './ButtonIcon';
 
 type Props = {
   children: ReactNode;
@@ -32,11 +32,12 @@ export function ModalScreen({
       style={styles.scroll}
       contentContainerStyle={[styles.content, contentStyle]}
       keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}>
+      showsVerticalScrollIndicator={false}
+    >
       {children}
     </ScrollView>
   ) : (
-    <View style={[styles.content, contentStyle]}>{children}</View>
+    <View style={[styles.flex, contentStyle]}>{children}</View>
   );
 
   return (
@@ -48,23 +49,29 @@ export function ModalScreen({
         accessibilityLabel="Dismiss"
       />
       <View
-        style={[
-          styles.sheet,
-          {paddingBottom: Math.max(insets.bottom, spacing.md)},
-          style,
-        ]}>
-        <View style={styles.chrome}>
-          <View style={styles.handle} />
-          <Pressable
-            onPress={onClose}
-            hitSlop={12}
-            accessibilityRole="button"
-            accessibilityLabel="Close"
-            style={styles.close}>
-            <X color={colors.textMuted} size={20} />
-          </Pressable>
+        style={[styles.flex, { paddingTop: Math.max(insets.top, spacing.md) }]}
+      >
+        <View
+          style={[
+            styles.flex,
+            styles.sheet,
+            // { paddingTop: Math.max(insets.top, spacing.md) },
+            style,
+          ]}
+        >
+          <View style={styles.chrome}>
+            <View style={styles.handle} />
+            <ButtonIcon
+              icon="X"
+              size={20}
+              color="textMuted"
+              onPress={onClose}
+              style={styles.closeButton}
+              hitSlop={12}
+            />
+          </View>
+          {body}
         </View>
-        {body}
       </View>
     </View>
   );
@@ -73,7 +80,6 @@ export function ModalScreen({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    justifyContent: 'flex-end',
   },
   backdrop: {
     position: 'absolute',
@@ -83,13 +89,14 @@ const styles = StyleSheet.create({
     left: 0,
     backgroundColor: colors.overlay,
   },
+  flex: {
+    flex: 1,
+  },
   sheet: {
     backgroundColor: colors.bg,
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
-    borderWidth: 1,
     borderColor: colors.borderSubtle,
-    height: '92%',
     overflow: 'hidden',
   },
   chrome: {
@@ -107,17 +114,8 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: colors.border,
   },
-  close: {
-    position: 'absolute',
-    right: spacing.lg,
-    top: spacing.sm,
-    width: 32,
-    height: 32,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-    zIndex: 3,
+  closeButton: {
+    marginLeft: 'auto',
   },
   scroll: {
     flex: 1,

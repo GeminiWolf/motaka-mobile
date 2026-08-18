@@ -1,7 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -9,8 +12,7 @@ import {
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Button} from '../components/common/Button';
-import {Chip} from '../components/common/Chip';
-import {ModalScreen} from '../components/common/ModalScreen';
+import { Chip } from '../components/common/Chip';
 import {NestedCategorySheet} from '../components/common/NestedCategorySheet';
 import {SectionHeader} from '../components/common/SectionHeader';
 import type {GarageStackParamList} from '../navigation/types';
@@ -25,6 +27,10 @@ import type {
 import {formatCategoryPath} from '../utils/formatCategoryPath';
 import {getCatalogPartDefaults} from '../utils/getCatalogPartDefaults';
 import {colors, radius, spacing, typography} from '../theme';
+import ModalContainer from '../components/modal/ModalContainer';
+import ModalHeader from '../components/modal/ModalHeader';
+import ButtonIcon from '../components/common/ButtonIcon';
+import { lightenColor } from '../utils/lightenColor';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'AddPart'>;
 type Tab = 'browse' | 'manual';
@@ -135,124 +141,158 @@ export function AddPartScreen({navigation, route}: Props) {
     'Choose category';
 
   return (
-    <ModalScreen scroll onClose={() => navigation.goBack()}>
-      <SectionHeader
-        title="Add part"
-        subtitle={
-          vehicle
-            ? `${vehicle.year} ${vehicle.make} ${vehicle.model}`
-            : 'Track a part for this vehicle'
-        }
-      />
-
-      <View style={styles.tabs}>
-        {(['browse', 'manual'] as Tab[]).map(t => (
-          <Pressable
-            key={t}
-            style={[styles.tab, tab === t && styles.tabActive]}
-            onPress={() => setTab(t)}>
-            <Text style={styles.tabText}>
-              {t === 'browse' ? 'Browse' : 'Manual'}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
-
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-
-      {tab === 'browse' ? (
-        <View style={styles.block}>
-          <Text style={styles.hint}>Browse parts by category</Text>
-          <Pressable
-            style={styles.categoryField}
-            onPress={() => setCategorySheetOpen(true)}>
-            <Text style={styles.fieldLabel}>Category</Text>
-            <Text style={styles.categoryValue}>{categoryLabel}</Text>
-          </Pressable>
-
-          {selectedCategory ? (
-            <TextInput
-              style={styles.input}
-              placeholder="Filter by name"
-              placeholderTextColor={colors.textDim}
-              value={query}
-              onChangeText={setQuery}
-              accessibilityLabel="Filter catalog parts by name"
+    <ModalContainer>
+      <View style={styles.root}>
+        <ModalHeader
+          withHandle
+          rightSection={
+            <ButtonIcon
+              icon="X"
+              color={colors.textMuted}
+              onPress={() => navigation.goBack()}
             />
-          ) : null}
-          {loading ? (
-            <ActivityIndicator color={colors.accent} />
-          ) : selectedCategory && results.length === 0 ? (
-            <Text style={styles.emptyResults}>
-              No parts in this category match your search.
-            </Text>
-          ) : (
-            results.map(part => (
+          }
+        />
+        <View style={[styles.flex, styles.sidePadding]}>
+          <View>
+            <SectionHeader
+              title="Add part"
+              subtitle={
+                vehicle
+                  ? `${vehicle.year} ${vehicle.make} ${vehicle.model}`
+                  : 'Track a part for this vehicle'
+              }
+            />
+          </View>
+
+          <View style={styles.tabs}>
+            {(['browse', 'manual'] as Tab[]).map(t => (
               <Pressable
-                key={part.id}
-                style={[
-                  styles.result,
-                  selectedCatalog?.id === part.id && styles.resultSelected,
-                ]}
-                onPress={() => setSelectedCatalog(part)}>
-                <Text style={styles.resultName}>{part.name}</Text>
+                key={t}
+                style={[styles.tab, tab === t && styles.tabActive]}
+                onPress={() => setTab(t)}
+              >
+                <Text style={styles.tabText}>
+                  {t === 'browse' ? 'Browse' : 'Manual'}
+                </Text>
               </Pressable>
-            ))
-          )}
-        </View>
-      ) : null}
-
-      {(tab === 'manual' || selectedCatalog) && (
-        <View style={styles.form}>
-          <SectionHeader title="Details" subtitle="Priority, notes, estimate" />
-          <Field label="Name" value={name} onChangeText={setName} />
-          <Field
-            label="Part number"
-            value={partNumber}
-            onChangeText={setPartNumber}
-          />
-          <Field label="Category" value={category} onChangeText={setCategory} />
-          <Field
-            label="Estimated cost"
-            value={estimatedCost}
-            onChangeText={setEstimatedCost}
-            keyboardType="decimal-pad"
-          />
-          <Field label="Notes" value={notes} onChangeText={setNotes} />
-          <Text style={styles.fieldLabel}>Priority</Text>
-          <View style={styles.chips}>
-            {PRIORITIES.map(p => (
-              <Chip
-                key={p}
-                label={p}
-                selected={priority === p}
-                onPress={() => setPriority(p)}
-              />
             ))}
           </View>
-          <Text style={styles.fieldLabel}>Status</Text>
-          <View style={styles.chips}>
-            {STATUSES.map(s => (
-              <Chip
-                key={s}
-                label={s}
-                selected={status === s}
-                onPress={() => setStatus(s)}
-              />
-            ))}
-          </View>
-          <Button label="Save tracked part" onPress={save} />
-        </View>
-      )}
 
-      <NestedCategorySheet
-        visible={categorySheetOpen}
-        baseUrl={apiBaseUrl}
-        selectedId={selectedCategory?.id}
-        onClose={() => setCategorySheetOpen(false)}
-        onSelect={loadByCategory}
-      />
-    </ModalScreen>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.flex}
+          >
+            <ScrollView style={styles.flex}>
+              {error ? <Text style={styles.error}>{error}</Text> : null}
+
+              {tab === 'browse' ? (
+                <View style={styles.block}>
+                  <Text style={styles.hint}>Browse parts by category</Text>
+                  <Pressable
+                    style={styles.categoryField}
+                    onPress={() => setCategorySheetOpen(true)}
+                  >
+                    <Text style={styles.fieldLabel}>Category</Text>
+                    <Text style={styles.categoryValue}>{categoryLabel}</Text>
+                  </Pressable>
+
+                  {selectedCategory ? (
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Filter by name"
+                      placeholderTextColor={colors.textDim}
+                      value={query}
+                      onChangeText={setQuery}
+                      accessibilityLabel="Filter catalog parts by name"
+                    />
+                  ) : null}
+                  {loading ? (
+                    <ActivityIndicator color={colors.accent} />
+                  ) : selectedCategory && results.length === 0 ? (
+                    <Text style={styles.emptyResults}>
+                      No parts in this category match your search.
+                    </Text>
+                  ) : (
+                    results.map(part => (
+                      <Pressable
+                        key={part.id}
+                        style={[
+                          styles.result,
+                          selectedCatalog?.id === part.id &&
+                            styles.resultSelected,
+                        ]}
+                        onPress={() => setSelectedCatalog(part)}
+                      >
+                        <Text style={styles.resultName}>{part.name}</Text>
+                      </Pressable>
+                    ))
+                  )}
+                </View>
+              ) : null}
+
+              {(tab === 'manual' || selectedCatalog) && (
+                <>
+                  <SectionHeader
+                    title="Details"
+                    subtitle="Priority, notes, estimate"
+                  />
+                  <Field label="Name" value={name} onChangeText={setName} />
+                  <Field
+                    label="Part number"
+                    value={partNumber}
+                    onChangeText={setPartNumber}
+                  />
+                  <Field
+                    label="Category"
+                    value={category}
+                    onChangeText={setCategory}
+                  />
+                  <Field
+                    label="Estimated cost"
+                    value={estimatedCost}
+                    onChangeText={setEstimatedCost}
+                    keyboardType="decimal-pad"
+                  />
+                  <Field label="Notes" value={notes} onChangeText={setNotes} />
+                  <Text style={styles.fieldLabel}>Priority</Text>
+                  <View style={styles.chips}>
+                    {PRIORITIES.map(p => (
+                      <Chip
+                        key={p}
+                        label={p}
+                        selected={priority === p}
+                        onPress={() => setPriority(p)}
+                      />
+                    ))}
+                  </View>
+                  <Text style={styles.fieldLabel}>Status</Text>
+                  <View style={styles.chips}>
+                    {STATUSES.map(s => (
+                      <Chip
+                        key={s}
+                        label={s}
+                        selected={status === s}
+                        onPress={() => setStatus(s)}
+                      />
+                    ))}
+                  </View>
+                  <Button label="Save tracked part" onPress={save} />
+                </>
+              )}
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </View>
+
+        <NestedCategorySheet
+          visible={categorySheetOpen}
+          baseUrl={apiBaseUrl}
+          selectedId={selectedCategory?.id}
+          onClose={() => setCategorySheetOpen(false)}
+          onSelect={loadByCategory}
+        />
+      </View>
+    </ModalContainer>
   );
 }
 
@@ -282,12 +322,26 @@ function Field({
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+  },
   tabs: {
     flexDirection: 'row',
     backgroundColor: colors.surface,
     borderRadius: radius.md,
     padding: 4,
     marginBottom: spacing.md,
+  },
+  flex: {
+    flex: 1,
+  },
+  sidePadding: {
+    paddingHorizontal: spacing.lg,
   },
   tab: {
     flex: 1,
@@ -304,10 +358,12 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   block: {
+    flex: 1,
     marginBottom: spacing.lg,
     gap: spacing.sm,
   },
   form: {
+    flex: 1,
     gap: spacing.xs,
   },
   input: {

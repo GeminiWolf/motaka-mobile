@@ -3,18 +3,24 @@ import type { AppSettings } from '../types';
 
 export const STORAGE_KEY = 'garageforge.v1';
 
+export const BASE_URL_OBJ = {
+  production: 'https://auto-v-backend-production.up.railway.app',
+  localAndroid: 'http://10.0.2.2:3000',
+  localIOS: 'http://localhost:3000',
+};
+
 /** Host docs/privacy-policy.md and set this to the live HTTPS URL before store submission. */
 export const PRIVACY_POLICY_URL =
   'https://example.com/garage-forge-privacy-policy';
 
 export function getDefaultApiBaseUrl(): string {
   if (!__DEV__) {
-    return 'https://auto-v-backend-production.up.railway.app';
+    return BASE_URL_OBJ.production;
   }
 
   return Platform.OS === 'android'
-    ? 'http://10.0.2.2:3000'
-    : 'http://localhost:3000';
+    ? BASE_URL_OBJ.localAndroid
+    : BASE_URL_OBJ.localIOS;
 }
 
 function currentBudgetPeriodKey(date = new Date()): string {
@@ -27,8 +33,8 @@ export function getDefaultSettings(): AppSettings {
   return {
     currency: 'ZAR',
     units: 'metric',
-    monthlyBudget: 2000,
-    budgetRollover: true,
+    monthlyBudget: 20000,
+    budgetRollover: false,
     budgetCarryOver: 0,
     budgetPeriodKey: currentBudgetPeriodKey(),
     budgetPeriodCommittedBaseline: 0,

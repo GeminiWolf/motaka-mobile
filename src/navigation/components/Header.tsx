@@ -7,7 +7,6 @@ import { colors, spacing } from '../../theme';
 import { Badge } from '@react-navigation/elements';
 import { Button } from '../../components/common/Button';
 import { PlusIcon } from 'lucide-react-native';
-import GarageForgeIcon from '../../assets/GarageForgeIcon';
 
 type HeaderProps = BottomTabHeaderProps;
 
@@ -37,14 +36,14 @@ export default function Header({ route, navigation }: HeaderProps) {
   return (
     <View style={[styles.container, { paddingTop: top }]}>
       <View style={[styles.row, { gap: spacing.sm }]}>
-        <GarageForgeIcon
-          size={32}
-          color={colors.bg}
-          backgroundColor={colors.accent}
-        />
-        <Text size="2xl" weight="bold" tone="accent">
-          GarageForge
-        </Text>
+        <View style={styles.titleContainer}>
+          <Text size="2xl" weight="bold">
+            GARAGE
+          </Text>
+          <Text size="2xl" weight="bold" tone="accent">
+            FORGE
+          </Text>
+        </View>
         <Badge visible={false} size={12} style={styles.badge}>
           PRO
         </Badge>
@@ -68,6 +67,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.slate500,
+  },
+  titleContainer: {
+    gap: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   badge: {
     backgroundColor: colors.accent,
