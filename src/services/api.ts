@@ -3,9 +3,14 @@ import ReactNativeBlobUtil from 'react-native-blob-util';
 import type {
   CatalogPart,
   Make,
+  MakeOption,
   Model,
+  ModelOption,
   ModelYear,
   PartCategory,
+  VariantOption,
+  VehicleVariant,
+  YearOption,
 } from '../types';
 import type { GarageExportPayload } from '../utils/garageExport';
 import {
@@ -24,27 +29,14 @@ export class ApiError extends Error {
   }
 }
 
-type ApiMake = {id: number; name: string; created_at: string};
-type ApiModel = {
-  id: number;
-  make_id: number;
-  name: string;
-  created_at: string;
-};
-type ApiModelYear = {
-  id: number;
-  model_id: number;
-  year: number;
-  created_at: string;
-};
 type ApiCategory = {
-  id: number;
+  id: string;
   name: string;
   parent_id: number | null;
   created_at: string;
 };
 type ApiPart = {
-  id: number;
+  id: string;
   name: string;
   category_id: number | null;
   created_at: string;
@@ -52,24 +44,16 @@ type ApiPart = {
 
 const API_VERSION = 'v1';
 
-export function mapMake(raw: ApiMake): Make {
-  return {id: String(raw.id), name: raw.name};
+export function mapMake(raw: Make): MakeOption {
+  return { ...raw, id: String(raw.id), name: raw.name };
 }
 
-export function mapModel(raw: ApiModel): Model {
-  return {
-    id: String(raw.id),
-    name: raw.name,
-    makeId: String(raw.make_id),
-  };
+export function mapModel(raw: Model): ModelOption {
+  return { ...raw, id: String(raw.id), name: raw.name };
 }
 
-export function mapModelYear(raw: ApiModelYear): ModelYear {
-  return {
-    id: String(raw.id),
-    modelId: String(raw.model_id),
-    year: raw.year,
-  };
+export function mapModelYear(raw: ModelYear): YearOption {
+  return { ...raw, id: String(raw.year), name: String(raw.year) };
 }
 
 export function mapCategory(raw: ApiCategory): PartCategory {
@@ -86,6 +70,10 @@ export function mapPart(raw: ApiPart): CatalogPart {
     name: raw.name,
     categoryId: raw.category_id != null ? String(raw.category_id) : undefined,
   };
+}
+
+export function mapVariant(raw: VehicleVariant): VariantOption {
+  return { ...raw, id: String(raw.id), name: raw.trim };
 }
 
 let apiBearerToken = '';
@@ -167,21 +155,22 @@ async function request<T>(
 export async function getMakes(
   baseUrl: string,
   region: string,
-): Promise<Make[]> {
-  const rows = await request<ApiMake[]>(
+): Promise<MakeOption[]> {
+  const rows = await request<Make[]>(
     baseUrl,
-    `api/${API_VERSION}/vehicles/makes?region=${encodeURIComponent(region)}`,
+    `/api/${API_VERSION}/vehicles/makes?region=${encodeURIComponent(region)}`,
   );
+
   return rows.map(mapMake);
 }
 
 export async function getModels(
   baseUrl: string,
   makeId: string,
-): Promise<Model[]> {
-  const rows = await request<ApiModel[]>(
+): Promise<ModelOption[]> {
+  const rows = await request<Model[]>(
     baseUrl,
-    `api/${API_VERSION}/vehicles/models?make_id=${encodeURIComponent(makeId)}`,
+    `/api/${API_VERSION}/vehicles/models?make_id=${encodeURIComponent(makeId)}`,
   );
   return rows.map(mapModel);
 }
@@ -189,21 +178,35 @@ export async function getModels(
 export async function getModelYears(
   baseUrl: string,
   modelId: string,
-): Promise<ModelYear[]> {
-  const rows = await request<ApiModelYear[]>(
+): Promise<YearOption[]> {
+  const rows = await request<ModelYear[]>(
     baseUrl,
-    `api/${API_VERSION}/vehicles/years?model_id=${encodeURIComponent(modelId)}`,
+    `/api/${API_VERSION}/vehicles/years?model_id=${encodeURIComponent(
+      modelId,
+    )}`,
   );
   return rows.map(mapModelYear);
 }
 
 export async function getVariants(
   baseUrl: string,
-  region: string,
-): Promise<Make[]> {
-  const rows = await request<ApiVariant[]>(
+  modelId: string,
+  year: string,
+): Promise<VariantOption[]> {
+  console.log(
+    'getVariants',
     baseUrl,
-    `api/${API_VERSION}/vehicles/variants?region=${encodeURIComponent(region)}`,
+    modelId,
+    year,
+    `/api/${API_VERSION}/vehicles/models/${modelId}/variants?year=${encodeURIComponent(
+      year,
+    )}`,
+  );
+  const rows = await request<VehicleVariant[]>(
+    baseUrl,
+    `/api/${API_VERSION}/vehicles/models/${modelId}/variants?year=${encodeURIComponent(
+      year,
+    )}`,
   );
   return rows.map(mapVariant);
 }
