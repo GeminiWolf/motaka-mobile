@@ -7,36 +7,49 @@ import {
   View,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {Button} from '../../components/common/Button';
-import {ModalScreen} from '../../components/common/ModalScreen';
-import {SearchableBottomSheet} from '../../components/common/SearchableBottomSheet';
-import {SectionHeader} from '../../components/common/SectionHeader';
+import { Button } from '../../components/common/Button';
+import { SearchableBottomSheet } from '../../components/common/SearchableBottomSheet';
 import type {GarageStackParamList} from '../../navigation/types';
-import {getMakes, getModels, getModelYears} from '../../services/api';
+import {
+  getMakes,
+  getModels,
+  getModelYears,
+  getVariants,
+} from '../../services/api';
 import {useGarageStore} from '../../store/garageStore';
-import type {Make, Model, ModelYear} from '../../types';
+import type {
+  MakeOption,
+  ModelOption,
+  VariantOption,
+  YearOption,
+} from '../../types';
 import {colors, radius, spacing, typography} from '../../theme';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'AddVehicle'>;
-type SheetKind = 'makes' | 'models' | 'years';
+type SheetKind = 'makes' | 'models' | 'years' | 'variants';
 
 export function AddVehicleScreen({navigation}: Props) {
   const apiBaseUrl = useGarageStore(s => s.settings.apiBaseUrl);
   const region = useGarageStore(s => s.settings.region);
   const addVehicle = useGarageStore(s => s.addVehicle);
 
-  const [makes, setMakes] = useState<Make[]>([]);
-  const [selectedMake, setSelectedMake] = useState<Make | null>(null);
-  const [models, setModels] = useState<Model[]>([]);
-  const [selectedModel, setSelectedModel] = useState<Model | null>(null);
-  const [modelYears, setModelYears] = useState<ModelYear[]>([]);
-  const [selectedModelYear, setSelectedModelYear] = useState<ModelYear | null>(
+  const [makes, setMakes] = useState<MakeOption[]>([]);
+  const [selectedMake, setSelectedMake] = useState<MakeOption | null>(null);
+  const [models, setModels] = useState<ModelOption[]>([]);
+  const [selectedModel, setSelectedModel] = useState<ModelOption | null>(null);
+  const [modelYears, setModelYears] = useState<YearOption[]>([]);
+  const [selectedModelYear, setSelectedModelYear] = useState<YearOption | null>(
+    null,
+  );
+  const [variants, setVariants] = useState<VariantOption[]>([]);
+  const [selectedVariant, setSelectedVariant] = useState<VariantOption | null>(
     null,
   );
   const [openSheet, setOpenSheet] = useState<SheetKind | null>(null);
   const [loadingMakes, setLoadingMakes] = useState(false);
   const [loadingModels, setLoadingModels] = useState(false);
   const [loadingYears, setLoadingYears] = useState(false);
+  const [loadingVariants, setLoadingVariants] = useState(false);
   const [error, setError] = useState('');
   const [validationError, setValidationError] = useState('');
 
@@ -51,6 +64,7 @@ export function AddVehicleScreen({navigation}: Props) {
         }
       })
       .catch(err => {
+        console.error('getMakes error', err);
         if (!cancelled) {
           setError(err.message || 'Failed to load makes');
           setMakes([]);
@@ -128,6 +142,33 @@ export function AddVehicleScreen({navigation}: Props) {
     };
   }, [selectedModel, apiBaseUrl]);
 
+  useEffect(() => {
+    if (!selectedModel || !selectedModelYear) {
+      return;
+    }
+    let cancelled = false;
+    setLoadingVariants(true);
+    setError('');
+    getVariants(apiBaseUrl, selectedModel.id, selectedModelYear.id)
+      .then(data => {
+        if (!cancelled) {
+          setVariants(data);
+          setSelectedVariant(null);
+        }
+      })
+      .catch(err => {
+        if (!cancelled) {
+          setError(err.message || 'Failed to load variants');
+          setVariants([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoadingVariants(false);
+        }
+      });
+  }, [selectedModel, selectedModelYear, apiBaseUrl]);
+
   const makeOptions = useMemo(
     () => makes.map(m => ({key: m.id, label: m.name})),
     [makes],
@@ -137,8 +178,12 @@ export function AddVehicleScreen({navigation}: Props) {
     [models],
   );
   const yearOptions = useMemo(
-    () => modelYears.map(y => ({key: y.id, label: String(y.year)})),
+    () => modelYears.map(y => ({ key: y.id, label: String(y.year) })),
     [modelYears],
+  );
+  const variantOptions = useMemo(
+    () => variants.map(v => ({ key: v.id, label: v.name })),
+    [variants],
   );
 
   const sheetConfig = useMemo(() => {
@@ -179,6 +224,18 @@ export function AddVehicleScreen({navigation}: Props) {
             setValidationError('');
           },
         };
+      case 'variants':
+        return {
+          title: 'Select variant',
+          options: variantOptions,
+          selectedKey: selectedVariant?.id,
+          searchPlaceholder: 'Search variants',
+          onSelect: (key: string) => {
+            const variant = variants.find(v => v.id === key) ?? null;
+            setSelectedVariant(variant);
+            setValidationError('');
+          },
+        };
       default:
         return null;
     }
@@ -187,20 +244,29 @@ export function AddVehicleScreen({navigation}: Props) {
     makeOptions,
     modelOptions,
     yearOptions,
+    variantOptions,
+    variants,
     makes,
     models,
     modelYears,
     selectedMake?.id,
     selectedModel?.id,
     selectedModelYear?.id,
+    selectedVariant?.id,
   ]);
 
   const save = () => {
-    if (!selectedMake || !selectedModel || !selectedModelYear) {
+    if (
+      !selectedMake ||
+      !selectedModel ||
+      !selectedModelYear ||
+      !selectedVariant
+    ) {
       const missing = [
         !selectedMake ? 'make' : null,
         !selectedModel ? 'model' : null,
         !selectedModelYear ? 'year' : null,
+        !selectedVariant ? 'variant' : null,
       ].filter(Boolean);
       setValidationError(`Choose ${missing.join(', ')} to save.`);
       return;
@@ -210,16 +276,14 @@ export function AddVehicleScreen({navigation}: Props) {
       year: selectedModelYear.year,
       make: selectedMake.name,
       model: selectedModel.name,
-      trim: 'Standard',
+      trim: selectedVariant.trim,
       modelYearId: selectedModelYear.id,
     });
     navigation.replace('CarDashboard', {vehicleId: id});
   };
 
   return (
-    <ModalScreen scroll onClose={() => navigation.goBack()}>
-      <SectionHeader title="Add vehicle" subtitle="Make → model → year" />
-
+    <View style={styles.container}>
       {error ? <Text style={styles.error}>{error}</Text> : null}
       {validationError ? (
         <Text style={styles.error}>{validationError}</Text>
@@ -240,8 +304,8 @@ export function AddVehicleScreen({navigation}: Props) {
             !selectedMake
               ? 'Pick a make first'
               : loadingModels
-                ? 'Loading models…'
-                : undefined
+              ? 'Loading models…'
+              : undefined
           }
           disabled={!selectedMake || loadingModels}
           loading={loadingModels}
@@ -250,26 +314,40 @@ export function AddVehicleScreen({navigation}: Props) {
         <FieldButton
           label="Year"
           value={
-            selectedModelYear
-              ? String(selectedModelYear.year)
-              : 'Choose year'
+            selectedModelYear ? String(selectedModelYear.year) : 'Choose year'
           }
           hint={
             !selectedModel
               ? 'Pick a model first'
               : loadingYears
-                ? 'Loading years…'
-                : undefined
+              ? 'Loading years…'
+              : undefined
           }
           disabled={!selectedModel || loadingYears}
           loading={loadingYears}
           onPress={() => setOpenSheet('years')}
         />
+        <FieldButton
+          label="Variant"
+          value={
+            selectedVariant ? String(selectedVariant.name) : 'Choose variant'
+          }
+          hint={
+            !selectedModelYear
+              ? 'Pick a year first'
+              : loadingVariants
+              ? 'Loading variants…'
+              : undefined
+          }
+          disabled={!selectedModelYear || loadingVariants}
+          loading={loadingVariants}
+          onPress={() => setOpenSheet('variants')}
+        />
         <Button
           label="Save to garage"
           onPress={save}
           disabled={loadingMakes || loadingModels || loadingYears}
-          style={{marginTop: spacing.md}}
+          style={{ marginTop: spacing.md }}
         />
       </View>
 
@@ -277,12 +355,12 @@ export function AddVehicleScreen({navigation}: Props) {
         visible={sheetConfig != null}
         title={sheetConfig?.title ?? ''}
         options={sheetConfig?.options ?? []}
-        selectedKey={sheetConfig?.selectedKey}
+        selectedKey={sheetConfig?.selectedKey?.toString() ?? ''}
         searchPlaceholder={sheetConfig?.searchPlaceholder}
         onClose={() => setOpenSheet(null)}
         onSelect={option => sheetConfig?.onSelect(option.key)}
       />
-    </ModalScreen>
+    </View>
   );
 }
 
@@ -321,6 +399,9 @@ function FieldButton({
 }
 
 const styles = StyleSheet.create({
+  container: {
+    padding: spacing.md,
+  },
   block: {
     gap: spacing.sm,
   },

@@ -131,11 +131,6 @@ export function RootNavigator() {
           component={AddVehicleScreen}
           options={{
             title: 'Add vehicle',
-            presentation: 'transparentModal',
-            animation: 'slide_from_bottom',
-            headerShown: false,
-            contentStyle: { backgroundColor: 'transparent' },
-            gestureDirection: 'vertical',
           }}
         />
         <GarageStack.Screen

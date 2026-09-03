@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing, typography } from '../../theme';
+import { WINDOW_HEIGHT } from '../../utils/device';
+import ButtonIcon from './ButtonIcon';
 
 export type SearchableOption = {
   key: string;
@@ -94,12 +96,16 @@ export function SearchableBottomSheet({
         <View
           style={[
             styles.sheet,
+            { height: WINDOW_HEIGHT - insets.top },
             !searchable && styles.sheetCompact,
             { paddingBottom: Math.max(insets.bottom, spacing.md) },
           ]}
         >
           <View style={styles.handle} />
-          <Text style={styles.title}>{title}</Text>
+          <View style={styles.header}>
+            <Text style={styles.title}>{title}</Text>
+            <ButtonIcon icon="X" variant="secondary" onPress={onClose} />
+          </View>
           {searchable ? (
             <>
               <TextInput
@@ -142,13 +148,18 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     backgroundColor: colors.overlay,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
   sheet: {
     backgroundColor: colors.surface,
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
     borderWidth: 1,
     borderColor: colors.borderSubtle,
-    height: '72%',
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
   },
@@ -166,7 +177,6 @@ const styles = StyleSheet.create({
   title: {
     ...typography.subtitle,
     color: colors.text,
-    marginBottom: spacing.sm,
   },
   search: {
     backgroundColor: colors.bg,
