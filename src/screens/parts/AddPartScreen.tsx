@@ -11,26 +11,25 @@ import {
   View,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {Button} from '../components/common/Button';
-import { Chip } from '../components/common/Chip';
-import {NestedCategorySheet} from '../components/common/NestedCategorySheet';
-import {SectionHeader} from '../components/common/SectionHeader';
-import type {GarageStackParamList} from '../navigation/types';
-import {getParts} from '../services/api';
-import {useGarageStore} from '../store/garageStore';
+import {Button} from '../../components/common/Button';
+import { Chip } from '../../components/common/Chip';
+import {NestedCategorySheet} from '../../components/common/NestedCategorySheet';
+import {SectionHeader} from '../../components/common/SectionHeader';
+import type {GarageStackParamList} from '../../navigation/types';
+import {getParts} from '../../services/api';
+import {useGarageStore} from '../../store/garageStore';
 import type {
   CatalogPart,
   PartCategory,
   PartPriority,
   PartStatus,
-} from '../types';
-import {formatCategoryPath} from '../utils/formatCategoryPath';
-import {getCatalogPartDefaults} from '../utils/getCatalogPartDefaults';
-import {colors, radius, spacing, typography} from '../theme';
-import ModalContainer from '../components/modal/ModalContainer';
-import ModalHeader from '../components/modal/ModalHeader';
-import ButtonIcon from '../components/common/ButtonIcon';
-import { lightenColor } from '../utils/lightenColor';
+} from '../../types';
+import {formatCategoryPath} from '../../utils/formatCategoryPath';
+import {getCatalogPartDefaults} from '../../utils/getCatalogPartDefaults';
+import {colors, radius, spacing, typography} from '../../theme';
+import ModalContainer from '../../components/modal/ModalContainer';
+import ModalHeader from '../../components/modal/ModalHeader';
+import ButtonIcon from '../../components/common/ButtonIcon';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'AddPart'>;
 type Tab = 'browse' | 'manual';

@@ -2,22 +2,22 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import React, { useMemo, useState } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import { EmptyState } from '../components/common/EmptyState';
-import { Screen } from '../components/common/Screen';
-import { TrackedPartRow } from '../components/parts/TrackedPartRow';
-import type { GarageStackParamList } from '../navigation/types';
-import { useGarageStore } from '../store/garageStore';
-import { colors, spacing } from '../theme';
-import { prioritizeParts } from '../utils/healthSummary';
-import { statusFromChecklistChecked } from '../utils/partsChecklistStatus';
-import { Card } from '../components/common/Card';
+import { EmptyState } from '../../components/common/EmptyState';
+import { Screen } from '../../components/common/Screen';
+import { TrackedPartRow } from '../../components/parts/TrackedPartRow';
+import type { GarageStackParamList } from '../../navigation/types';
+import { useGarageStore } from '../../store/garageStore';
+import { colors, spacing } from '../../theme';
+import { prioritizeParts } from '../../utils/healthSummary';
+import { statusFromChecklistChecked } from '../../utils/partsChecklistStatus';
+import { Card } from '../../components/common/Card';
 import { ListChecks, Search, Wallet } from 'lucide-react-native';
-import { Text } from '../components/common/Text';
-import { Input } from '../components/common/Input';
-import { Dropdown } from '../components/common/Dropdown';
-import type { DropdownOption } from '../components/common/Dropdown';
-import { useDebounce } from '../hooks/useDebounce';
-import type { PartPriority, PartStatus } from '../types';
+import { Text } from '../../components/common/Text';
+import { Input } from '../../components/common/Input';
+import { Dropdown } from '../../components/common/Dropdown';
+import type { DropdownOption } from '../../components/common/Dropdown';
+import { useDebounce } from '../../hooks/useDebounce';
+import type { PartPriority, PartStatus } from '../../types';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'PartsChecklist'>;
 

@@ -10,29 +10,29 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 
-import { version } from '../../package.json';
-import { Button } from '../components/common/Button';
-import { SearchableBottomSheet } from '../components/common/SearchableBottomSheet';
-import { useGarageStore } from '../store/garageStore';
-import type { CurrencyCode } from '../types';
-import { colors, radius, spacing, typography } from '../theme';
-import { Card } from '../components/common/Card';
-import { List } from '../components/common/List';
-import { Text } from '../components/common/Text';
-import { Input } from '../components/common/Input';
-import { regionOptions } from '../utils/constants';
+import { version } from '../../../package.json';
+import { Button } from '../../components/common/Button';
+import { SearchableBottomSheet } from '../../components/common/SearchableBottomSheet';
+import { useGarageStore } from '../../store/garageStore';
+import type { CurrencyCode } from '../../types';
+import { colors, radius, spacing, typography } from '../../theme';
+import { Card } from '../../components/common/Card';
+import { List } from '../../components/common/List';
+import { Text } from '../../components/common/Text';
+import { Input } from '../../components/common/Input';
+import { regionOptions } from '../../utils/constants';
 import {
   formatMoney,
   getCurrencySymbol,
   parseMonthlyBudget,
-} from '../utils/formatMoney';
-import { getUnitSystemLabel, isUnitSystem } from '../utils/garageExport';
+} from '../../utils/formatMoney';
+import { getUnitSystemLabel, isUnitSystem } from '../../utils/garageExport';
 import {
   formatSpendingAlertThreshold,
   parseSpendingAlertThreshold,
   SPENDING_ALERT_THRESHOLDS,
-} from '../utils/spendingAlerts';
-import { withOpacity } from '../utils/withOpacity';
+} from '../../utils/spendingAlerts';
+import { withOpacity } from '../../utils/withOpacity';
 
 const CURRENCIES: CurrencyCode[] = ['ZAR', 'USD', 'EUR'];
 

@@ -1,12 +1,12 @@
 import React from 'react';
 import {StyleSheet, Text} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {EmptyState} from '../components/common/EmptyState';
-import {Screen} from '../components/common/Screen';
-import {SectionHeader} from '../components/common/SectionHeader';
-import type {GarageStackParamList} from '../navigation/types';
-import {useGarageStore} from '../store/garageStore';
-import {colors, spacing, typography} from '../theme';
+import {EmptyState} from '../../components/common/EmptyState';
+import {Screen} from '../../components/common/Screen';
+import {SectionHeader} from '../../components/common/SectionHeader';
+import type {GarageStackParamList} from '../../navigation/types';
+import {useGarageStore} from '../../store/garageStore';
+import {colors, spacing, typography} from '../../theme';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'FindPart'>;
 

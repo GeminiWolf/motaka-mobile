@@ -1,12 +1,13 @@
-import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { colors } from '../theme';
-import { Text } from '../components/common/Text';
+import React from 'react';
 
-export default function DataAndStorageScreen() {
+import { Text } from '../../components/common/Text';
+import { colors } from '../../theme';
+
+export default function LicensesScreen() {
   return (
     <View style={styles.container}>
-      <Text>Data and Storage</Text>
+      <Text>LicensesScreen</Text>
     </View>
   );
 }

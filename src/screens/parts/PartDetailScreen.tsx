@@ -7,15 +7,15 @@ import {
   View,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {Button} from '../components/common/Button';
-import {Chip} from '../components/common/Chip';
-import {EmptyState} from '../components/common/EmptyState';
-import {Screen} from '../components/common/Screen';
-import {SectionHeader} from '../components/common/SectionHeader';
-import type {GarageStackParamList} from '../navigation/types';
-import {useGarageStore} from '../store/garageStore';
-import type {PartPriority, PartStatus} from '../types';
-import {colors, radius, spacing, typography} from '../theme';
+import {Button} from '../../components/common/Button';
+import {Chip} from '../../components/common/Chip';
+import {EmptyState} from '../../components/common/EmptyState';
+import {Screen} from '../../components/common/Screen';
+import {SectionHeader} from '../../components/common/SectionHeader';
+import type {GarageStackParamList} from '../../navigation/types';
+import {useGarageStore} from '../../store/garageStore';
+import type {PartPriority, PartStatus} from '../../types';
+import {colors, radius, spacing, typography} from '../../theme';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'PartDetail'>;
 

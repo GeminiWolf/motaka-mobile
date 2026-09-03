@@ -8,21 +8,21 @@ import {
 } from 'react-native';
 import { Car } from 'lucide-react-native';
 
-import { Card } from '../components/common/Card';
-import { EmptyState } from '../components/common/EmptyState';
-import { List } from '../components/common/List';
-import { Text } from '../components/common/Text';
-import { ApiError, exportVehiclePdf } from '../services/api';
-import { useGarageStore } from '../store/garageStore';
-import { colors, spacing } from '../theme';
-import type { Vehicle } from '../types';
+import { Card } from '../../components/common/Card';
+import { EmptyState } from '../../components/common/EmptyState';
+import { List } from '../../components/common/List';
+import { Text } from '../../components/common/Text';
+import { ApiError, exportVehiclePdf } from '../../services/api';
+import { useGarageStore } from '../../store/garageStore';
+import { colors, spacing } from '../../theme';
+import type { Vehicle } from '../../types';
 import {
   buildGarageExportPayload,
   getPartsExportDescription,
   getTrackedPartsForVehicle,
   getVehicleExportLabel,
-} from '../utils/garageExport';
-import { sharePdfFile } from '../utils/sharePdf';
+} from '../../utils/garageExport';
+import { sharePdfFile } from '../../utils/sharePdf';
 
 export default function ExportScreen() {
   const vehicles = useGarageStore(s => s.vehicles);

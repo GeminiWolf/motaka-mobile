@@ -50,6 +50,8 @@ type ApiPart = {
   created_at: string;
 };
 
+const API_VERSION = 'v1';
+
 export function mapMake(raw: ApiMake): Make {
   return {id: String(raw.id), name: raw.name};
 }
@@ -162,51 +164,69 @@ async function request<T>(
   return response.json() as Promise<T>;
 }
 
-export function getMakes(baseUrl: string, region: string): Promise<Make[]> {
-  return request<ApiMake[]>(
+export async function getMakes(
+  baseUrl: string,
+  region: string,
+): Promise<Make[]> {
+  const rows = await request<ApiMake[]>(
     baseUrl,
-    `/vehicles/makes?region=${encodeURIComponent(region)}`,
-  ).then(rows => rows.map(mapMake));
+    `api/${API_VERSION}/vehicles/makes?region=${encodeURIComponent(region)}`,
+  );
+  return rows.map(mapMake);
 }
 
-export function getModels(baseUrl: string, makeId: string): Promise<Model[]> {
-  return request<ApiModel[]>(
+export async function getModels(
+  baseUrl: string,
+  makeId: string,
+): Promise<Model[]> {
+  const rows = await request<ApiModel[]>(
     baseUrl,
-    `/vehicles/models?make_id=${encodeURIComponent(makeId)}`,
-  ).then(rows => rows.map(mapModel));
+    `api/${API_VERSION}/vehicles/models?make_id=${encodeURIComponent(makeId)}`,
+  );
+  return rows.map(mapModel);
 }
 
-export function getModelYears(
+export async function getModelYears(
   baseUrl: string,
   modelId: string,
 ): Promise<ModelYear[]> {
-  return request<ApiModelYear[]>(
+  const rows = await request<ApiModelYear[]>(
     baseUrl,
-    `/vehicles/years?model_id=${encodeURIComponent(modelId)}`,
-  ).then(rows => rows.map(mapModelYear));
+    `api/${API_VERSION}/vehicles/years?model_id=${encodeURIComponent(modelId)}`,
+  );
+  return rows.map(mapModelYear);
 }
 
-export function getCategories(
+export async function getVariants(
+  baseUrl: string,
+  region: string,
+): Promise<Make[]> {
+  const rows = await request<ApiVariant[]>(
+    baseUrl,
+    `api/${API_VERSION}/vehicles/variants?region=${encodeURIComponent(region)}`,
+  );
+  return rows.map(mapVariant);
+}
+
+export async function getCategories(
   baseUrl: string,
   parentId?: string,
 ): Promise<PartCategory[]> {
   const qs =
-    parentId != null
-      ? `?parent_id=${encodeURIComponent(parentId)}`
-      : '';
-  return request<ApiCategory[]>(baseUrl, `/categories${qs}`).then(rows =>
-    rows.map(mapCategory),
-  );
+    parentId != null ? `?parent_id=${encodeURIComponent(parentId)}` : '';
+  const rows = await request<ApiCategory[]>(baseUrl, `/categories${qs}`);
+  return rows.map(mapCategory);
 }
 
-export function getParts(
+export async function getParts(
   baseUrl: string,
   categoryId: string,
 ): Promise<CatalogPart[]> {
-  return request<ApiPart[]>(
+  const rows = await request<ApiPart[]>(
     baseUrl,
     `/parts?category_id=${encodeURIComponent(categoryId)}`,
-  ).then(rows => rows.map(mapPart));
+  );
+  return rows.map(mapPart);
 }
 
 export async function probeApiHealth(

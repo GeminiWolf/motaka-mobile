@@ -6,15 +6,15 @@ import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Badge } from '@react-navigation/elements';
 
-import { EmptyState } from '../components/common/EmptyState';
-import { Text } from '../components/common/Text';
-import { VehicleCard } from '../components/garage/VehicleCard';
+import { EmptyState } from '../../components/common/EmptyState';
+import { Text } from '../../components/common/Text';
+import { VehicleCard } from '../../components/garage/VehicleCard';
 import type {
   GarageStackParamList,
   RootTabParamList,
-} from '../navigation/types';
-import { useGarageStore } from '../store/garageStore';
-import { colors, spacing } from '../theme';
+} from '../../navigation/types';
+import { useGarageStore } from '../../store/garageStore';
+import { colors, spacing } from '../../theme';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<RootTabParamList, 'GarageTab'>,

@@ -5,22 +5,22 @@ import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import { Card } from '../components/common/Card';
-import { EmptyState } from '../components/common/EmptyState';
-import { Input } from '../components/common/Input';
-import { ProgressBar } from '../components/common/ProgressBar';
-import { Text } from '../components/common/Text';
+import { Card } from '../../components/common/Card';
+import { EmptyState } from '../../components/common/EmptyState';
+import { Input } from '../../components/common/Input';
+import { ProgressBar } from '../../components/common/ProgressBar';
+import { Text } from '../../components/common/Text';
 import type {
   GarageStackParamList,
   RootTabParamList,
-} from '../navigation/types';
-import { useBudgetOverview } from '../hooks/useBudgetOverview';
-import { useGarageStore } from '../store/garageStore';
-import { colors, spacing } from '../theme';
+} from '../../navigation/types';
+import { useBudgetOverview } from '../../hooks/useBudgetOverview';
+import { useGarageStore } from '../../store/garageStore';
+import { colors, spacing } from '../../theme';
 import { Paperclip } from 'lucide-react-native';
-import BudgetPartItem from '../components/budget/BudgetPartItem';
-import { suggestBuyOrder } from '../utils/budgetPlanner';
-import { formatMoney } from '../utils/formatMoney';
+import BudgetPartItem from '../../components/budget/BudgetPartItem';
+import { suggestBuyOrder } from '../../utils/budgetPlanner';
+import { formatMoney } from '../../utils/formatMoney';
 
 type Nav = CompositeNavigationProp<
   BottomTabNavigationProp<RootTabParamList, 'BudgetTab'>,

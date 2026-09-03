@@ -1,15 +1,15 @@
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { colors, spacing } from '../theme';
-import { Text } from '../components/common/Text';
-import { Card } from '../components/common/Card';
-import { Badge, BadgeTone } from '../components/common/Badge';
-import { Input } from '../components/common/Input';
-import { Button } from '../components/common/Button';
-import { useGarageStore } from '../store/garageStore';
-import { probeApiHealth } from '../services/api';
-import { SearchableBottomSheet } from '../components/common/SearchableBottomSheet';
-import { BASE_URL_OBJ } from '../config';
+import { colors, spacing } from '../../theme';
+import { Text } from '../../components/common/Text';
+import { Card } from '../../components/common/Card';
+import { Badge, BadgeTone } from '../../components/common/Badge';
+import { Input } from '../../components/common/Input';
+import { Button } from '../../components/common/Button';
+import { useGarageStore } from '../../store/garageStore';
+import { probeApiHealth } from '../../services/api';
+import { SearchableBottomSheet } from '../../components/common/SearchableBottomSheet';
+import { BASE_URL_OBJ } from '../../config';
 
 type ProbeState = 'idle' | 'checking' | 'ok' | 'fail';
 

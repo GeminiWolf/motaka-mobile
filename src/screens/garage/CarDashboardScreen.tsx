@@ -3,21 +3,21 @@ import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ListChecks, Trash } from 'lucide-react-native';
 
-import { EmptyState } from '../components/common/EmptyState';
-import { Screen } from '../components/common/Screen';
-import { TrackedPartRow } from '../components/parts/TrackedPartRow';
-import type { GarageStackParamList } from '../navigation/types';
-import { useGarageStore } from '../store/garageStore';
-import { prioritizeParts } from '../utils/healthSummary';
-import { colors, radius, spacing, typography } from '../theme';
-import { Card } from '../components/common/Card';
-import { Badge } from '../components/common/Badge';
-import { formatMoney } from '../utils/formatMoney';
-import { ProgressBar } from '../components/common/ProgressBar';
-import { Text } from '../components/common/Text';
-import { withOpacity } from '../utils/withOpacity';
-import { statusFromChecklistChecked } from '../utils/partsChecklistStatus';
-import { useBudgetOverview } from '../hooks/useBudgetOverview';
+import { EmptyState } from '../../components/common/EmptyState';
+import { Screen } from '../../components/common/Screen';
+import { TrackedPartRow } from '../../components/parts/TrackedPartRow';
+import type { GarageStackParamList } from '../../navigation/types';
+import { useGarageStore } from '../../store/garageStore';
+import { prioritizeParts } from '../../utils/healthSummary';
+import { colors, radius, spacing, typography } from '../../theme';
+import { Card } from '../../components/common/Card';
+import { Badge } from '../../components/common/Badge';
+import { formatMoney } from '../../utils/formatMoney';
+import { ProgressBar } from '../../components/common/ProgressBar';
+import { Text } from '../../components/common/Text';
+import { withOpacity } from '../../utils/withOpacity';
+import { statusFromChecklistChecked } from '../../utils/partsChecklistStatus';
+import { useBudgetOverview } from '../../hooks/useBudgetOverview';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'CarDashboard'>;
 

@@ -5,27 +5,29 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Car, Settings as SettingsIcon, Wallet } from 'lucide-react-native';
 
 import type { GarageStackParamList, RootTabParamList } from './types';
-import { AddPartScreen } from '../screens/AddPartScreen';
-import { AddVehicleScreen } from '../screens/AddVehicleScreen';
-import { BudgetCarScreen } from '../screens/BudgetCarScreen';
-import { BudgetScreen } from '../screens/BudgetScreen';
-import { CarDashboardScreen } from '../screens/CarDashboardScreen';
-import { FindPartScreen } from '../screens/FindPartScreen';
-import { GarageHomeScreen } from '../screens/GarageHomeScreen';
-import { PartDetailScreen } from '../screens/PartDetailScreen';
-import { PartsTrackerScreen } from '../screens/PartsTrackerScreen';
-import { SettingsScreen } from '../screens/SettingsScreen';
+import {
+  AboutScreen,
+  AddPartScreen,
+  AddVehicleScreen,
+  ApiConnectionScreen,
+  BudgetCarScreen,
+  BudgetScreen,
+  CarDashboardScreen,
+  DataAndStorageScreen,
+  ExportScreen,
+  FindPartScreen,
+  GarageHomeScreen,
+  LicensesScreen,
+  PartDetailScreen,
+  PartsChecklistScreen,
+  PartsTrackerScreen,
+  SettingsScreen,
+} from '../screens';
 import { colors } from '../theme';
 import Header from './components/Header';
 import { CarDashboardHeaderRight } from './components/CarDashboardHeaderRight';
 import { PartsChecklistHeaderRight } from './components/PartsChecklistHeaderRight';
 import { PartsChecklistHeaderTitle } from './components/PartsChecklistHeaderTitle';
-import { PartsChecklistScreen } from '../screens/PartsChecklistScreen';
-import DataAndStorageScreen from '../screens/DataAndStorageScreen';
-import ExportScreen from '../screens/ExportScreen';
-import AboutScreen from '../screens/AboutScreen';
-import LicensesScreen from '../screens/LicensesScreen';
-import ApiConnectionScreen from '../screens/ApiConnectionScreen';
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const GarageStack = createNativeStackNavigator<GarageStackParamList>();

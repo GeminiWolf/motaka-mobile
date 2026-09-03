@@ -2,17 +2,17 @@ import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import { BudgetSummary } from '../components/budget/BudgetSummary';
-import { MonthPlan } from '../components/budget/MonthPlan';
-import { EmptyState } from '../components/common/EmptyState';
-import { Screen } from '../components/common/Screen';
-import type { GarageStackParamList } from '../navigation/types';
-import { useBudgetOverview } from '../hooks/useBudgetOverview';
-import { useGarageStore } from '../store/garageStore';
-import { formatMoney } from '../utils/formatMoney';
-import { colors, radius, spacing, typography } from '../theme';
-import { Text } from '../components/common/Text';
-import { Card } from '../components/common/Card';
+import { BudgetSummary } from '../../components/budget/BudgetSummary';
+import { MonthPlan } from '../../components/budget/MonthPlan';
+import { EmptyState } from '../../components/common/EmptyState';
+import { Screen } from '../../components/common/Screen';
+import type { GarageStackParamList } from '../../navigation/types';
+import { useBudgetOverview } from '../../hooks/useBudgetOverview';
+import { useGarageStore } from '../../store/garageStore';
+import { formatMoney } from '../../utils/formatMoney';
+import { colors, radius, spacing, typography } from '../../theme';
+import { Text } from '../../components/common/Text';
+import { Card } from '../../components/common/Card';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'BudgetCar'>;
 

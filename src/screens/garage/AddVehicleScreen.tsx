@@ -7,15 +7,15 @@ import {
   View,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {Button} from '../components/common/Button';
-import {ModalScreen} from '../components/common/ModalScreen';
-import {SearchableBottomSheet} from '../components/common/SearchableBottomSheet';
-import {SectionHeader} from '../components/common/SectionHeader';
-import type {GarageStackParamList} from '../navigation/types';
-import {getMakes, getModels, getModelYears} from '../services/api';
-import {useGarageStore} from '../store/garageStore';
-import type {Make, Model, ModelYear} from '../types';
-import {colors, radius, spacing, typography} from '../theme';
+import {Button} from '../../components/common/Button';
+import {ModalScreen} from '../../components/common/ModalScreen';
+import {SearchableBottomSheet} from '../../components/common/SearchableBottomSheet';
+import {SectionHeader} from '../../components/common/SectionHeader';
+import type {GarageStackParamList} from '../../navigation/types';
+import {getMakes, getModels, getModelYears} from '../../services/api';
+import {useGarageStore} from '../../store/garageStore';
+import type {Make, Model, ModelYear} from '../../types';
+import {colors, radius, spacing, typography} from '../../theme';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'AddVehicle'>;
 type SheetKind = 'makes' | 'models' | 'years';

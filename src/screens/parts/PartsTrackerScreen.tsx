@@ -7,16 +7,16 @@ import {
   View,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {Button} from '../components/common/Button';
-import {EmptyState} from '../components/common/EmptyState';
-import {Screen} from '../components/common/Screen';
-import {SectionHeader} from '../components/common/SectionHeader';
-import {TrackedPartRow} from '../components/parts/TrackedPartRow';
-import type {GarageStackParamList} from '../navigation/types';
-import {useGarageStore} from '../store/garageStore';
-import type {PartPriority, PartStatus} from '../types';
-import {prioritizeParts} from '../utils/healthSummary';
-import {colors, radius, shadows, spacing, typography} from '../theme';
+import {Button} from '../../components/common/Button';
+import {EmptyState} from '../../components/common/EmptyState';
+import {Screen} from '../../components/common/Screen';
+import {SectionHeader} from '../../components/common/SectionHeader';
+import {TrackedPartRow} from '../../components/parts/TrackedPartRow';
+import type {GarageStackParamList} from '../../navigation/types';
+import {useGarageStore} from '../../store/garageStore';
+import type {PartPriority, PartStatus} from '../../types';
+import {prioritizeParts} from '../../utils/healthSummary';
+import {colors, radius, shadows, spacing, typography} from '../../theme';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'PartsTracker'>;
 type FilterKind = 'status' | 'priority' | 'category';
