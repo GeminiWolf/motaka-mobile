@@ -23,6 +23,7 @@ type Props = {
   leftSection?: ReactNode;
   tone?: BadgeTone;
   style?: StyleProp<ViewStyle>;
+  color?: BadgeTone;
 };
 
 export const BADGE_TONE_COLOR: Record<BadgeTone, string> = {
@@ -48,9 +49,11 @@ export function Badge({
   leftSection,
   tone = 'default',
   style,
+  color,
 }: Props) {
   const toneColor = BADGE_TONE_COLOR[tone];
   const textTone = BADGE_TEXT_TONE[tone];
+  const textColor = BADGE_TEXT_TONE[color ?? tone];
 
   return (
     <View
@@ -75,7 +78,7 @@ export function Badge({
           )}
         </View>
       ) : null}
-      <Text size="xs" weight="semibold" tone={textTone}>
+      <Text size="xs" weight="semibold" tone={textColor ?? textTone}>
         {label}
       </Text>
     </View>

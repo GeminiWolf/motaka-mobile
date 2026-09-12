@@ -11,16 +11,17 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getCategories } from '../../services/api';
-import type { PartCategory } from '../../types';
+import type { PartCategoryOption } from '../../types';
 import { formatCategoryPath } from '../../utils/formatCategoryPath';
 import { colors, radius, spacing, typography } from '../../theme';
+import { WINDOW_HEIGHT } from '../../utils/device';
 
 type Props = {
   visible: boolean;
   baseUrl: string;
   selectedId?: string | null;
   onClose: () => void;
-  onSelect: (category: PartCategory, path: PartCategory[]) => void;
+  onSelect: (category: PartCategoryOption, path: PartCategoryOption[]) => void;
 };
 
 export function NestedCategorySheet({
@@ -31,8 +32,8 @@ export function NestedCategorySheet({
   onSelect,
 }: Props) {
   const insets = useSafeAreaInsets();
-  const [path, setPath] = useState<PartCategory[]>([]);
-  const [options, setOptions] = useState<PartCategory[]>([]);
+  const [path, setPath] = useState<PartCategoryOption[]>([]);
+  const [options, setOptions] = useState<PartCategoryOption[]>([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -92,12 +93,15 @@ export function NestedCategorySheet({
     setPath(prev => prev.slice(0, -1));
   };
 
-  const selectCategory = (category: PartCategory, nextPath: PartCategory[]) => {
+  const selectCategory = (
+    category: PartCategoryOption,
+    nextPath: PartCategoryOption[],
+  ) => {
     onSelect(category, nextPath);
     onClose();
   };
 
-  const openCategory = async (category: PartCategory) => {
+  const openCategory = async (category: PartCategoryOption) => {
     setLoading(true);
     setError('');
     try {
@@ -127,7 +131,10 @@ export function NestedCategorySheet({
         <View
           style={[
             styles.sheet,
-            { paddingBottom: Math.max(insets.bottom, spacing.md) },
+            {
+              paddingBottom: Math.max(insets.bottom, spacing.md),
+              height: WINDOW_HEIGHT - insets.top,
+            },
           ]}
         >
           <View style={styles.handle} />

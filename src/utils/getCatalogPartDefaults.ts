@@ -1,6 +1,9 @@
-import {CatalogPart} from '../types';
+import { CatalogPartOption } from '../types';
 
-export function getCatalogPartDefaults(catalog: CatalogPart, category: string) {
+export function getCatalogPartDefaults(
+  catalog: CatalogPartOption,
+  category: string,
+) {
   return {
     name: catalog.name,
     partNumber: catalog.id,

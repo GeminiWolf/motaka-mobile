@@ -11,13 +11,15 @@ import { colors, spacing } from '../../theme';
 import { prioritizeParts } from '../../utils/healthSummary';
 import { statusFromChecklistChecked } from '../../utils/partsChecklistStatus';
 import { Card } from '../../components/common/Card';
-import { ListChecks, Search, Wallet } from 'lucide-react-native';
+import { Search } from 'lucide-react-native';
 import { Text } from '../../components/common/Text';
 import { Input } from '../../components/common/Input';
 import { Dropdown } from '../../components/common/Dropdown';
 import type { DropdownOption } from '../../components/common/Dropdown';
 import { useDebounce } from '../../hooks/useDebounce';
 import type { PartPriority, PartStatus } from '../../types';
+import { useBudgetOverview } from '../../hooks/useBudgetOverview';
+import { formatMoney } from '../../utils/formatMoney';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'PartsChecklist'>;
 
@@ -65,6 +67,7 @@ export function PartsChecklistScreen({ navigation, route }: Props) {
 
   const { vehicleId } = route.params;
   const vehicle = useGarageStore(s => s.vehicles.find(v => v.id === vehicleId));
+  const monthlyBudget = useGarageStore(s => s.settings.monthlyBudget);
   const trackedParts = useGarageStore(s => s.trackedParts);
   const updateTrackedPart = useGarageStore(s => s.updateTrackedPart);
   const currency = useGarageStore(s => s.settings.currency);
@@ -91,6 +94,8 @@ export function PartsChecklistScreen({ navigation, route }: Props) {
     updateTrackedPart(partId, { status: statusFromChecklistChecked(checked) });
   };
 
+  const { totalNeeded, usagePercent } = useBudgetOverview(parts);
+
   if (!vehicle) {
     return (
       <Screen>
@@ -105,29 +110,32 @@ export function PartsChecklistScreen({ navigation, route }: Props) {
 
   return (
     <Screen contentStyle={styles.content}>
-      <View style={styles.summaryContainer}>
-        <Card bordered style={styles.summaryCard}>
-          <Wallet size={28} color={colors.accent} />
-          <Text size="lg" weight="semibold">
-            R4000
-          </Text>
-          <Text size="sm">Remaining</Text>
-        </Card>
-        <Card bordered style={styles.summaryCard}>
-          <ListChecks size={28} color={colors.graySoft} />
-          <Text size="lg" weight="semibold">
-            12
-          </Text>
-          <Text size="sm">Needed</Text>
-        </Card>
-        <Card bordered style={styles.summaryCard}>
-          <Wallet size={28} color={colors.graySoft} />
-          <Text size="lg" weight="semibold">
-            R4000
-          </Text>
-          <Text size="sm">Spent</Text>
-        </Card>
-      </View>
+      <Card gap={spacing.sm} style={styles.sideMargin}>
+        <View style={[styles.row, styles.spaceBetween]}>
+          <View>
+            <Text weight="semibold" size="xs" transform="uppercase">
+              Budget
+            </Text>
+            <View style={styles.budgetAmount}>
+              <Text weight="semibold" size="xl">
+                {formatMoney(totalNeeded, currency)}
+              </Text>
+              <Text tone="accent">{`/ ${formatMoney(
+                monthlyBudget,
+                currency,
+              )}`}</Text>
+            </View>
+          </View>
+          <View>
+            <Text
+              size="sm"
+              transform="uppercase"
+              tone="accent"
+              weight="bold"
+            >{`${usagePercent.toFixed(0)}% Procured`}</Text>
+          </View>
+        </View>
+      </Card>
       <View style={styles.searchContainer}>
         <Input
           placeholder="Search parts..."
@@ -152,10 +160,6 @@ export function PartsChecklistScreen({ navigation, route }: Props) {
             items={sortOptions}
           />
         </View>
-        <Text
-          size="lg"
-          weight="semibold"
-        >{`Parts Checklist (${checklist.length})`}</Text>
       </View>
       <FlatList
         keyExtractor={item => item.id}
@@ -189,6 +193,21 @@ export function PartsChecklistScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
+  sideMargin: {
+    marginHorizontal: spacing.lg,
+  },
+  spaceBetween: {
+    justifyContent: 'space-between',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  budgetAmount: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: spacing.xs,
+  },
   summaryContainer: {
     marginHorizontal: spacing.lg,
     maxWidth: '100%',

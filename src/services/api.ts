@@ -2,12 +2,14 @@ import ReactNativeBlobUtil from 'react-native-blob-util';
 
 import type {
   CatalogPart,
+  CatalogPartOption,
   Make,
   MakeOption,
   Model,
   ModelOption,
   ModelYear,
   PartCategory,
+  PartCategoryOption,
   VariantOption,
   VehicleVariant,
   YearOption,
@@ -29,19 +31,6 @@ export class ApiError extends Error {
   }
 }
 
-type ApiCategory = {
-  id: string;
-  name: string;
-  parent_id: number | null;
-  created_at: string;
-};
-type ApiPart = {
-  id: string;
-  name: string;
-  category_id: number | null;
-  created_at: string;
-};
-
 const API_VERSION = 'v1';
 
 export function mapMake(raw: Make): MakeOption {
@@ -56,16 +45,17 @@ export function mapModelYear(raw: ModelYear): YearOption {
   return { ...raw, id: String(raw.year), name: String(raw.year) };
 }
 
-export function mapCategory(raw: ApiCategory): PartCategory {
+export function mapCategory(raw: PartCategory): PartCategoryOption {
   return {
     id: String(raw.id),
     name: raw.name,
-    parentId: raw.parent_id != null ? String(raw.parent_id) : undefined,
+    parentId: raw.parentId != null ? String(raw.parentId) : undefined,
   };
 }
 
-export function mapPart(raw: ApiPart): CatalogPart {
+export function mapPart(raw: CatalogPart): CatalogPartOption {
   return {
+    ...raw,
     id: String(raw.id),
     name: raw.name,
     categoryId: raw.category_id != null ? String(raw.category_id) : undefined,
@@ -214,18 +204,21 @@ export async function getVariants(
 export async function getCategories(
   baseUrl: string,
   parentId?: string,
-): Promise<PartCategory[]> {
+): Promise<PartCategoryOption[]> {
   const qs =
     parentId != null ? `?parent_id=${encodeURIComponent(parentId)}` : '';
-  const rows = await request<ApiCategory[]>(baseUrl, `/categories${qs}`);
+  const rows = await request<PartCategory[]>(
+    baseUrl,
+    `/api/${API_VERSION}/vehicles/vehicle-search${qs}`,
+  );
   return rows.map(mapCategory);
 }
 
 export async function getParts(
   baseUrl: string,
   categoryId: string,
-): Promise<CatalogPart[]> {
-  const rows = await request<ApiPart[]>(
+): Promise<CatalogPartOption[]> {
+  const rows = await request<CatalogPart[]>(
     baseUrl,
     `/parts?category_id=${encodeURIComponent(categoryId)}`,
   );

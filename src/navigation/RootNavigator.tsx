@@ -151,11 +151,6 @@ export function RootNavigator() {
           component={AddPartScreen}
           options={{
             title: 'Add part',
-            presentation: 'transparentModal',
-            animation: 'slide_from_bottom',
-            headerShown: false,
-            contentStyle: { backgroundColor: 'transparent' },
-            gestureDirection: 'vertical',
           }}
         />
         <GarageStack.Screen

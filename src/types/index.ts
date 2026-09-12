@@ -100,16 +100,44 @@ export type VariantOption = {
 } & Omit<VehicleVariant, 'id'>;
 
 export type PartCategory = {
-  id: string;
+  id: number;
   name: string;
   parentId?: string;
 };
 
-export type CatalogPart = {
+export type PartCategoryOption = {
   id: string;
   name: string;
-  categoryId?: string;
+} & Omit<PartCategory, 'id'>;
+
+export enum Brand {
+  SeedCatalog = 'Seed Catalog',
+}
+
+export interface PartCategories {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export type CatalogPart = {
+  id: number;
+  category_id: number;
+  name: string;
+  slug: string;
+  part_number: string;
+  brand: Brand;
+  description: string;
+  is_oem: boolean;
+  is_active: boolean;
+  part_categories: PartCategories;
 };
+
+export type CatalogPartOption = {
+  id: string;
+  name: string;
+  categoryId?: string | undefined;
+} & Omit<CatalogPart, 'id' | 'category_id'>;
 
 export type GaragePersistState = {
   vehicles: Vehicle[];

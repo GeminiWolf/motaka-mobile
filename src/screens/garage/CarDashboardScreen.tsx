@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ListChecks, Trash } from 'lucide-react-native';
+import { CirclePlus, ListChecks, Plus, Trash } from 'lucide-react-native';
 
 import { EmptyState } from '../../components/common/EmptyState';
 import { Screen } from '../../components/common/Screen';
@@ -18,6 +18,8 @@ import { Text } from '../../components/common/Text';
 import { withOpacity } from '../../utils/withOpacity';
 import { statusFromChecklistChecked } from '../../utils/partsChecklistStatus';
 import { useBudgetOverview } from '../../hooks/useBudgetOverview';
+import VehicleDashboardCard from '../../components/garage/VehicleDashboardCard';
+import { Button } from '../../components/common/Button';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'CarDashboard'>;
 
@@ -33,19 +35,9 @@ export function CarDashboardScreen({ navigation, route }: Props) {
     [trackedParts, vehicleId],
   );
 
-  const {
-    totalNeeded,
-    monthlyCap,
-    overBy,
-    isOverCap,
-    isSpendingAlert,
-    usagePercent,
-  } = useBudgetOverview(parts);
+  const { isOverCap, isSpendingAlert } = useBudgetOverview(parts);
 
   const currency = settings.currency;
-  const statusTone = isOverCap || isSpendingAlert ? 'warning' : 'accent';
-
-  const checklist = useMemo(() => prioritizeParts(parts).slice(0, 3), [parts]);
 
   const handleRemoveVehicle = () => {
     Alert.alert(
@@ -76,58 +68,17 @@ export function CarDashboardScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.container}>
-      <Card gap="md" backgroundColor="slate800" style={styles.sideMargin}>
-        <View style={[styles.row, styles.spaceBetween]}>
-          <View>
-            <View style={styles.row}>
-              <Badge
-                label={vehicle.year?.toString() ?? ''}
-                style={styles.yearBdage}
-                tone="accent"
-              />
+      <View style={styles.sideMargin}>
+        <VehicleDashboardCard vehicle={vehicle} />
+      </View>
 
-              <Text size="lg" tone="slate">
-                {vehicle.trim}
-              </Text>
-            </View>
-            <Text size="2xl" weight="bold" tone="white">
-              {vehicle.make} {vehicle.model}
-            </Text>
-          </View>
-          <Pressable onPress={handleRemoveVehicle}>
-            <View style={styles.dangerBox}>
-              <Trash size={24} color={colors.danger} />
-            </View>
-          </Pressable>
-        </View>
-        <Card backgroundColor="slate900" gap="lg">
-          <View style={[styles.row, styles.spaceBetween]}>
-            <Text>Total Needed across garage</Text>
-            <Text>{formatMoney(totalNeeded, settings.currency)}</Text>
-          </View>
-          <ProgressBar
-            value={totalNeeded}
-            max={monthlyCap}
-            warning={isSpendingAlert && !isOverCap}
-            accessibilityLabel="Budget used versus total cap"
-          />
-          <View style={[styles.row, styles.spaceBetween]}>
-            <Text size="sm">
-              Total Cap: {formatMoney(monthlyCap, currency)}
-            </Text>
-            <Text size="sm" tone={statusTone}>
-              {isOverCap
-                ? `${formatMoney(overBy, currency)} over monthly cap`
-                : `${formatMoney(-overBy, currency)} remaining`}
-            </Text>
-          </View>
-          {isSpendingAlert && !isOverCap ? (
-            <Text size="sm" tone="warning">
-              Spending alert: used {Math.round(usagePercent)}% of your budget
-            </Text>
-          ) : null}
-        </Card>
-      </Card>
+      <View style={styles.sideMargin}>
+        <Button
+          leftIcon={<CirclePlus size={16} />}
+          label="Add part"
+          onPress={() => navigation.navigate('AddPart', { vehicleId })}
+        />
+      </View>
 
       <View style={styles.checklist}>
         <View style={[styles.row, styles.spaceBetween, styles.sidePadding]}>
@@ -137,17 +88,17 @@ export function CarDashboardScreen({ navigation, route }: Props) {
               tone="white"
               size="lg"
               weight="semibold"
-            >{`Parts Checklist (${checklist.length})`}</Text>
+            >{`Parts Tracker (${parts.length})`}</Text>
           </View>
           <Pressable
             onPress={() => navigation.navigate('PartsChecklist', { vehicleId })}
           >
-            <Text tone="dim">View All</Text>
+            <Text tone="accent">Manage</Text>
           </Pressable>
         </View>
         <FlatList
           keyExtractor={item => item.id}
-          data={checklist}
+          data={parts}
           contentContainerStyle={styles.checklistContent}
           renderItem={({ item }) => (
             <TrackedPartRow
