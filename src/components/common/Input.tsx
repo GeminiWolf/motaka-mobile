@@ -7,7 +7,7 @@ import {
   type TextInputProps as RNTextInputProps,
   type ViewStyle,
 } from 'react-native';
-import { colors, fontFamily, radius as themeRadius, spacing } from '../../theme';
+import { colors, fontFamily, spacing } from '../../theme';
 import { Text } from './Text';
 
 type Padding = 'none' | 'sm' | 'md' | 'lg';
@@ -27,21 +27,6 @@ type Props = Omit<RNTextInputProps, 'style'> & {
   inputStyle?: StyleProp<ViewStyle>;
 };
 
-const PADDING: Record<Padding, number> = {
-  none: 0,
-  sm: spacing.sm,
-  md: spacing.md,
-  lg: spacing.lg,
-};
-
-const RADIUS: Record<Radius, number> = {
-  sm: themeRadius.sm,
-  md: themeRadius.md,
-  lg: themeRadius.lg,
-  xl: themeRadius.xl,
-  full: 9999,
-};
-
 const SIZE_STYLES: Record<
   Size,
   {minHeight: number; fontSize: number; padding: Padding}
@@ -51,10 +36,6 @@ const SIZE_STYLES: Record<
   lg: {minHeight: 56, fontSize: 16, padding: 'lg'},
 };
 
-function resolvePadding(padding: Padding | number): number {
-  return typeof padding === 'number' ? padding : PADDING[padding];
-}
-
 export function Input({
   label,
   helper,
@@ -62,8 +43,8 @@ export function Input({
   leftSection,
   rightSection,
   size = 'md',
-  padding,
-  radius = 'md',
+  padding: _padding,
+  radius: _radius,
   containerStyle,
   inputStyle,
   editable = true,
@@ -75,17 +56,11 @@ export function Input({
   const [focused, setFocused] = useState(false);
   const hasError = Boolean(error);
   const sizeStyle = SIZE_STYLES[size];
-  const resolvedPadding = resolvePadding(padding ?? sizeStyle.padding);
 
   return (
     <View style={containerStyle}>
       {label ? (
-        <Text
-          variant="label"
-          tone="muted"
-          transform="uppercase"
-          style={styles.label}
-        >
+        <Text variant="label" tone="muted" style={styles.label}>
           {label}
         </Text>
       ) : null}
@@ -94,8 +69,7 @@ export function Input({
         style={[
           styles.field,
           {
-            borderRadius: RADIUS[radius],
-            paddingHorizontal: resolvedPadding,
+            paddingHorizontal: 0,
             minHeight: sizeStyle.minHeight,
           },
           focused && styles.fieldFocused,
@@ -130,7 +104,7 @@ export function Input({
           style={[
             styles.input,
             {
-              paddingVertical: resolvedPadding,
+              paddingVertical: spacing.sm,
               fontSize: sizeStyle.fontSize,
             },
             inputStyle,
@@ -170,16 +144,17 @@ const styles = StyleSheet.create({
   field: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.slate500,
+    backgroundColor: 'transparent',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
     gap: spacing.sm,
   },
   fieldFocused: {
-    borderColor: colors.accent,
+    borderBottomColor: colors.accent,
+    borderBottomWidth: 1,
   },
   fieldError: {
-    borderColor: colors.danger,
+    borderBottomColor: colors.danger,
   },
   fieldDisabled: {
     opacity: 0.55,

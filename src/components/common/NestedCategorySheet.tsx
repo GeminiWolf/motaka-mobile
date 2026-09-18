@@ -1,21 +1,20 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
-  Modal,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getCategories } from '../../services/api';
 import type { PartCategoryOption } from '../../types';
 import { formatCategoryPath } from '../../utils/formatCategoryPath';
-import { colors, fontFamily, radius, spacing, typography } from '../../theme';
-import { WINDOW_HEIGHT } from '../../utils/device';
+import { colors, fontFamily, spacing, typography } from '../../theme';
 import { Button } from './Button';
 import { SkeletonList } from './Skeleton';
+import { SheetFrame } from './SheetFrame';
+import { Text as AppText } from './Text';
 
 type Props = {
   visible: boolean;
@@ -32,7 +31,6 @@ export function NestedCategorySheet({
   onClose,
   onSelect,
 }: Props) {
-  const insets = useSafeAreaInsets();
   const [path, setPath] = useState<PartCategoryOption[]>([]);
   const [options, setOptions] = useState<PartCategoryOption[]>([]);
   const [query, setQuery] = useState('');
@@ -46,7 +44,6 @@ export function NestedCategorySheet({
     if (!visible) {
       return;
     }
-    setPath([]);
     setQuery('');
     setError('');
   }, [visible]);
@@ -114,219 +111,139 @@ export function NestedCategorySheet({
       } else {
         selectCategory(category, [...path, category]);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to open category');
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to open category';
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal
+    <SheetFrame
       visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      title="Category"
+      onClose={onClose}
+      leading={
+        path.length > 0 ? (
+          <Pressable
+            onPress={goBack}
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            style={({ pressed }) => [styles.back, pressed && styles.pressed]}
+          >
+            <AppText weight="medium">Back</AppText>
+          </Pressable>
+        ) : null
+      }
     >
-      <View style={styles.root}>
-        <Pressable style={styles.backdrop} onPress={onClose} />
-        <View
-          style={[
-            styles.sheet,
-            {
-              paddingBottom: Math.max(insets.bottom, spacing.md),
-              height: WINDOW_HEIGHT - insets.top,
-            },
-          ]}
+      {breadcrumb ? (
+        <Text style={styles.breadcrumb} numberOfLines={2}>
+          {breadcrumb}
+        </Text>
+      ) : null}
+
+      {path.length > 0 ? (
+        <Pressable
+          style={styles.useCurrent}
+          onPress={() => selectCategory(path[path.length - 1], path)}
         >
-          <View style={styles.handle} />
-          <View style={styles.header}>
-            {path.length > 0 ? (
-              <Pressable
-                onPress={goBack}
-                hitSlop={8}
-                accessibilityRole="button"
-                accessibilityLabel="Back"
-              >
-                <Text style={styles.back}>Back</Text>
-              </Pressable>
-            ) : (
-              <View style={styles.backSpacer} />
-            )}
-            <Text style={styles.title}>Category</Text>
-            <Pressable
-              onPress={onClose}
-              hitSlop={8}
-              accessibilityRole="button"
-              accessibilityLabel="Close"
-            >
-              <Text style={styles.close}>Close</Text>
-            </Pressable>
-          </View>
+          <Text style={styles.useCurrentText}>
+            Use “{path[path.length - 1].name}”
+          </Text>
+        </Pressable>
+      ) : null}
 
-          {breadcrumb ? (
-            <Text style={styles.breadcrumb} numberOfLines={2}>
-              {breadcrumb}
-            </Text>
-          ) : (
-            <Text style={styles.hint}>Browse categories</Text>
-          )}
+      <TextInput
+        style={styles.search}
+        value={query}
+        onChangeText={setQuery}
+        placeholder="Search this level"
+        placeholderTextColor={colors.textDim}
+        autoCapitalize="none"
+        autoCorrect={false}
+        clearButtonMode="while-editing"
+        accessibilityLabel="Search categories"
+      />
 
-          {path.length > 0 ? (
-            <Pressable
-              style={styles.useCurrent}
-              onPress={() => selectCategory(path[path.length - 1], path)}
-            >
-              <Text style={styles.useCurrentText}>
-                Use “{path[path.length - 1].name}”
-              </Text>
-            </Pressable>
-          ) : null}
-
-          <TextInput
-            style={styles.search}
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Search this level"
-            placeholderTextColor={colors.textDim}
-            autoCapitalize="none"
-            autoCorrect={false}
-            clearButtonMode="while-editing"
-            accessibilityLabel="Search categories"
+      {error ? (
+        <View style={styles.errorRow}>
+          <Text style={styles.error}>{error}</Text>
+          <Button
+            label="Retry"
+            variant="ghost"
+            size="sm"
+            onPress={() => setReloadKey(key => key + 1)}
           />
-
-          {error ? (
-            <View style={styles.errorRow}>
-              <Text style={styles.error}>{error}</Text>
-              <Button
-                label="Retry"
-                variant="ghost"
-                size="sm"
-                onPress={() => setReloadKey(key => key + 1)}
-              />
-            </View>
-          ) : null}
-          {loading ? (
-            <SkeletonList />
-          ) : (
-            <FlatList
-              data={filtered}
-              keyExtractor={item => item.id}
-              keyboardShouldPersistTaps="handled"
-              style={styles.list}
-              ListEmptyComponent={
-                <Text style={styles.empty}>No categories here</Text>
-              }
-              renderItem={({ item }) => {
-                const selected = item.id === selectedId;
-                return (
-                  <Pressable
-                    style={[styles.option, selected && styles.optionSelected]}
-                    onPress={() => openCategory(item)}
-                    accessibilityRole="button"
-                    accessibilityLabel={item.name}
-                    accessibilityState={{ selected }}
-                  >
-                    <Text
-                      style={[
-                        styles.optionText,
-                        selected && styles.optionTextSelected,
-                      ]}
-                    >
-                      {item.name}
-                    </Text>
-                    <Text style={styles.chevron}>›</Text>
-                  </Pressable>
-                );
-              }}
-            />
-          )}
         </View>
-      </View>
-    </Modal>
+      ) : null}
+      {loading ? (
+        <SkeletonList />
+      ) : (
+        <FlatList
+          data={filtered}
+          keyExtractor={item => item.id}
+          keyboardShouldPersistTaps="handled"
+          style={styles.list}
+          ListEmptyComponent={
+            <Text style={styles.empty}>No categories here</Text>
+          }
+          renderItem={({ item }) => {
+            const selected = item.id === selectedId;
+            return (
+              <Pressable
+                style={styles.option}
+                onPress={() => openCategory(item)}
+                accessibilityRole="button"
+                accessibilityLabel={item.name}
+                accessibilityState={{ selected }}
+              >
+                <Text
+                  style={[
+                    styles.optionText,
+                    selected && styles.optionTextSelected,
+                  ]}
+                >
+                  {item.name}
+                </Text>
+              </Pressable>
+            );
+          }}
+        />
+      )}
+    </SheetFrame>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: colors.overlay,
-  },
-  sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    height: '78%',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-  },
-  handle: {
-    alignSelf: 'center',
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.border,
-    marginBottom: spacing.md,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm,
-  },
   back: {
-    ...typography.caption,
-    color: colors.accent,
-    minWidth: 48,
+    minHeight: 44,
+    justifyContent: 'center',
   },
-  backSpacer: {
-    minWidth: 48,
-  },
-  close: {
-    ...typography.caption,
-    color: colors.textMuted,
-    minWidth: 48,
-    textAlign: 'right',
-  },
-  title: {
-    ...typography.subtitle,
-    color: colors.text,
+  pressed: {
+    opacity: 0.72,
   },
   breadcrumb: {
-    ...typography.caption,
-    color: colors.accent,
-    marginBottom: spacing.sm,
-  },
-  hint: {
     ...typography.caption,
     color: colors.textMuted,
     marginBottom: spacing.sm,
   },
   useCurrent: {
     alignSelf: 'flex-start',
-    backgroundColor: colors.accentSoft,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    marginBottom: spacing.sm,
+    minHeight: 44,
+    justifyContent: 'center',
   },
   useCurrentText: {
-    ...typography.caption,
-    color: colors.accent,
-    fontFamily: fontFamily.bold,
+    ...typography.body,
+    color: colors.text,
+    fontFamily: fontFamily.medium,
   },
   search: {
-    backgroundColor: colors.bg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
+    backgroundColor: 'transparent',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+    paddingHorizontal: 0,
     paddingVertical: spacing.md,
     color: colors.text,
     fontFamily: fontFamily.regular,
@@ -338,7 +255,6 @@ const styles = StyleSheet.create({
   empty: {
     ...typography.caption,
     color: colors.textMuted,
-    textAlign: 'center',
     paddingVertical: spacing.xl,
   },
   errorRow: {
@@ -354,31 +270,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    minHeight: 48,
+    justifyContent: 'center',
     paddingVertical: spacing.md,
-    paddingHorizontal: spacing.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.borderSubtle,
-  },
-  optionSelected: {
-    backgroundColor: colors.accentSoft,
-    borderRadius: radius.sm,
-    borderBottomWidth: 0,
   },
   optionText: {
     ...typography.body,
     color: colors.text,
-    flex: 1,
-    paddingRight: spacing.sm,
   },
   optionTextSelected: {
-    color: colors.accent,
     fontFamily: fontFamily.semibold,
-  },
-  chevron: {
-    ...typography.title,
-    color: colors.textDim,
   },
 });

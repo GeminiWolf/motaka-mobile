@@ -7,10 +7,10 @@ import {
   ViewStyle,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {colors, spacing} from '../../theme';
+import {colors, layout} from '../../theme';
 
 type Props = {
-  children: ReactNode;
+  children?: ReactNode;
   scroll?: boolean;
   loading?: boolean;
   style?: ViewStyle;
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
-    padding: spacing.lg,
+    padding: layout.gutter,
   },
   loader: {
     flex: 1,

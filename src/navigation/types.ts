@@ -10,18 +10,8 @@ export type GarageStackParamList = {
   GarageHome: NavigatorScreenParams<RootTabParamList> | undefined;
   AddVehicle: undefined;
   CarDashboard: { vehicleId: string };
-  PartsTracker: { vehicleId: string };
   AddPart: { vehicleId: string };
   PartDetail: { partId: string };
-  PartsChecklist: { vehicleId: string };
-  FindPart: {
-    vehicleId: string;
-    partNumber?: string;
-    category?: string;
-    catalogPartId?: string;
-  };
-  BudgetCar: { vehicleId: string };
-  DataAndStorage: undefined;
   Export: undefined;
   About: undefined;
   Licenses: undefined;

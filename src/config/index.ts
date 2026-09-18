@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
-import type { AppSettings } from '../types';
+import type { AppSettings } from '../types/garage';
+import { getBudgetPeriodKey } from '../utils/budgetStatus';
 
 export const STORAGE_KEY = 'garageforge.v1';
 
@@ -23,12 +24,6 @@ export function getDefaultApiBaseUrl(): string {
     : BASE_URL_OBJ.localIOS;
 }
 
-function currentBudgetPeriodKey(date = new Date()): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  return `${year}-${month}`;
-}
-
 export function getDefaultSettings(): AppSettings {
   return {
     currency: 'ZAR',
@@ -36,13 +31,12 @@ export function getDefaultSettings(): AppSettings {
     monthlyBudget: 20000,
     budgetRollover: false,
     budgetCarryOver: 0,
-    budgetPeriodKey: currentBudgetPeriodKey(),
+    budgetPeriodKey: getBudgetPeriodKey(),
     budgetPeriodCommittedBaseline: 0,
     spendingAlertThreshold: 80,
     region: 'AF',
     apiBaseUrl: getDefaultApiBaseUrl(),
     apiBearerToken: '',
-    notificationsEnabled: false,
   };
 }
 

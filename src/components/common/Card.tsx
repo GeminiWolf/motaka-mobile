@@ -66,10 +66,10 @@ export function Card({
   children,
   padding = 'lg',
   gap,
-  radius = 'lg',
+  radius = 'sm',
   tone = 'surface',
   backgroundColor,
-  bordered = true,
+  bordered = false,
   shadowed = false,
   style,
 }: Props) {

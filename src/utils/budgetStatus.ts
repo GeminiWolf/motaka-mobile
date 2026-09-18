@@ -1,4 +1,4 @@
-import type { AppSettings, PartStatus, TrackedPart } from '../types';
+import type { AppSettings, PartStatus, TrackedPart } from '../types/garage';
 import { getBudgetParts, sumEstimatedCost } from './budgetPlanner';
 import { isSpendingAlertActive } from './spendingAlerts';
 

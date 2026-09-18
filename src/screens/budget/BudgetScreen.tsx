@@ -5,10 +5,10 @@ import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import { Card } from '../../components/common/Card';
 import { EmptyState } from '../../components/common/EmptyState';
 import { Input } from '../../components/common/Input';
 import { ProgressBar } from '../../components/common/ProgressBar';
+import { Screen } from '../../components/common/Screen';
 import { Text } from '../../components/common/Text';
 import type {
   GarageStackParamList,
@@ -16,11 +16,10 @@ import type {
 } from '../../navigation/types';
 import { useBudgetOverview } from '../../hooks/useBudgetOverview';
 import { useGarageStore } from '../../store/garageStore';
-import { colors, spacing } from '../../theme';
-import { Paperclip } from 'lucide-react-native';
+import { layout, spacing, tabularNums } from '../../theme';
 import BudgetPartItem from '../../components/budget/BudgetPartItem';
 import { suggestBuyOrder } from '../../utils/budgetPlanner';
-import { formatMoney } from '../../utils/formatMoney';
+import { formatMoney, getCurrencySymbol } from '../../utils/formatMoney';
 
 type Nav = CompositeNavigationProp<
   BottomTabNavigationProp<RootTabParamList, 'BudgetTab'>,
@@ -29,11 +28,12 @@ type Nav = CompositeNavigationProp<
 
 export function BudgetScreen() {
   const navigation = useNavigation<Nav>();
+  const hasHydrated = useGarageStore(s => s.hasHydrated);
   const vehicles = useGarageStore(s => s.vehicles);
   const trackedParts = useGarageStore(s => s.trackedParts);
   const settings = useGarageStore(s => s.settings);
   const updateSettings = useGarageStore(s => s.updateSettings);
-  const { totalNeeded, monthlyCap, overBy, isOverCap, isSpendingAlert, usagePercent } =
+  const { totalNeeded, monthlyCap, remaining, isOverCap, isSpendingAlert, usagePercent } =
     useBudgetOverview(trackedParts);
 
   const neededParts = useMemo(
@@ -42,7 +42,6 @@ export function BudgetScreen() {
   );
 
   const currency = settings.currency;
-  const statusTone = isOverCap || isSpendingAlert ? 'warning' : 'accent';
 
   const vehicleLabelById = useMemo(() => {
     const map = new Map<string, string>();
@@ -52,86 +51,78 @@ export function BudgetScreen() {
     return map;
   }, [vehicles]);
 
+  if (!hasHydrated) {
+    return <Screen loading />;
+  }
+
   return (
     <View style={styles.container}>
-      <View style={[styles.headerContainer, styles.sidePadding]}>
-        <Text size="lg" tone="accent">
-          Budget Planner
-        </Text>
-        <Text tone="white">
-          Manage monthly sourcing spend across your garage
-        </Text>
-      </View>
-
       {vehicles.length === 0 ? (
         <EmptyState
-          title="No vehicles yet"
-          subtitle="Budget rollup needs at least one car in the garage."
+          title="Nothing to budget yet"
+          subtitle="Add a car first. This screen is for what still needs buying, against this month’s cap."
           actionLabel="Add vehicle"
           onAction={() => navigation.navigate('AddVehicle')}
         />
       ) : (
-        <View style={styles.contentContainer}>
-          <Card backgroundColor="slate800" gap="md">
-            <Text size="xs">Monthly Sourcing Allowance (ZAR)</Text>
-            <Input
-              keyboardType="decimal-pad"
-              leftSection="R"
-              size="md"
-              value={String(settings.monthlyBudget)}
-              onChangeText={v =>
-                updateSettings({ monthlyBudget: Number(v) || 0 })
-              }
-              accessibilityLabel="Monthly budget"
-            />
-          </Card>
-          <Card backgroundColor="slate800" gap="lg">
-            <View style={[styles.row, styles.spaceBetween]}>
-              <Text>Total Needed across garage</Text>
-              <Text>{formatMoney(totalNeeded, currency)}</Text>
-            </View>
+        <View style={styles.content}>
+          <View style={styles.hero}>
+            <Text variant="label" tone="muted">
+              {isOverCap ? 'Over this month’s cap' : 'Left this month'}
+            </Text>
+            <Text variant="hero" style={tabularNums}>
+              {formatMoney(Math.abs(remaining), currency)}
+            </Text>
+            <Text tone="muted">
+              {formatMoney(totalNeeded, currency)} still to source
+            </Text>
             <ProgressBar
               value={totalNeeded}
               max={monthlyCap}
               warning={isSpendingAlert && !isOverCap}
-              accessibilityLabel="Budget used versus total cap"
+              accessibilityLabel="Amount still to source versus this month’s cap"
+              style={styles.bar}
             />
-            <View style={[styles.row, styles.spaceBetween]}>
-              <Text size="sm">
-                Total Cap: {formatMoney(monthlyCap, currency)}
-              </Text>
-              <Text size="sm" tone={statusTone}>
-                {isOverCap
-                  ? `${formatMoney(overBy, currency)} over monthly cap`
-                  : `${formatMoney(-overBy, currency)} remaining`}
-              </Text>
-            </View>
             {isSpendingAlert && !isOverCap ? (
               <Text size="sm" tone="warning">
-                Spending alert: used {Math.round(usagePercent)}% of your budget
+                {Math.round(usagePercent)}% of this month’s cap is spoken for
               </Text>
             ) : null}
-          </Card>
-          <View style={styles.priorityQueueContainer}>
-            <View style={styles.row}>
-              <Paperclip size={20} color={colors.accent} />
-              <Text size="sm">Buy First Priority Queue</Text>
-            </View>
-            <FlatList
-              keyExtractor={item => item.id}
-              data={neededParts}
-              style={styles.flatList}
-              contentContainerStyle={styles.flatListContentContainer}
-              renderItem={({ index, item }) => (
-                <BudgetPartItem
-                  index={index + 1}
-                  part={item}
-                  vehicleLabel={vehicleLabelById.get(item.vehicleId) ?? ''}
-                  currency={currency}
-                />
-              )}
-            />
           </View>
+
+          <Input
+            label="Monthly cap"
+            keyboardType="decimal-pad"
+            leftSection={getCurrencySymbol(currency)}
+            value={String(settings.monthlyBudget)}
+            onChangeText={v =>
+              updateSettings({ monthlyBudget: Number(v) || 0 })
+            }
+            accessibilityLabel="Monthly budget"
+          />
+
+          <Text variant="label" tone="muted" style={styles.queueLabel}>
+            Buy first
+          </Text>
+          <FlatList
+            keyExtractor={item => item.id}
+            data={neededParts}
+            style={styles.list}
+            ListEmptyComponent={
+              <Text tone="muted">No open parts waiting on money.</Text>
+            }
+            renderItem={({ index, item }) => (
+              <BudgetPartItem
+                index={index + 1}
+                part={item}
+                vehicleLabel={vehicleLabelById.get(item.vehicleId) ?? ''}
+                currency={currency}
+                onPress={() =>
+                  navigation.navigate('PartDetail', { partId: item.id })
+                }
+              />
+            )}
+          />
         </View>
       )}
     </View>
@@ -141,36 +132,23 @@ export function BudgetScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: spacing.lg,
-    paddingTop: spacing.lg,
+    paddingHorizontal: layout.gutter,
+    paddingTop: spacing.md,
   },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  spaceBetween: {
-    justifyContent: 'space-between',
-  },
-  sidePadding: {
-    paddingHorizontal: spacing.md,
-  },
-  headerContainer: {
-    gap: spacing.xs,
-  },
-  contentContainer: {
+  content: {
     flex: 1,
     gap: spacing.lg,
-    marginHorizontal: spacing.md,
   },
-  flatListContentContainer: {
-    gap: spacing.sm,
+  hero: {
+    gap: spacing.xs,
   },
-  flatList: {
+  bar: {
+    marginTop: spacing.sm,
+  },
+  queueLabel: {
+    marginTop: spacing.sm,
+  },
+  list: {
     flex: 1,
-  },
-  priorityQueueContainer: {
-    flex: 1,
-    gap: spacing.md,
   },
 });

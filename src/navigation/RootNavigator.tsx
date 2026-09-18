@@ -1,7 +1,9 @@
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Car, Settings as SettingsIcon, Wallet } from 'lucide-react-native';
 
 import type { GarageStackParamList, RootTabParamList } from './types';
@@ -10,27 +12,35 @@ import {
   AddPartScreen,
   AddVehicleScreen,
   ApiConnectionScreen,
-  BudgetCarScreen,
   BudgetScreen,
   CarDashboardScreen,
-  DataAndStorageScreen,
   ExportScreen,
-  FindPartScreen,
   GarageHomeScreen,
   LicensesScreen,
   PartDetailScreen,
-  PartsChecklistScreen,
-  PartsTrackerScreen,
   SettingsScreen,
 } from '../screens';
 import { colors, fontFamily } from '../theme';
 import Header from './components/Header';
-import { CarDashboardHeaderRight } from './components/CarDashboardHeaderRight';
-import { PartsChecklistHeaderRight } from './components/PartsChecklistHeaderRight';
-import { PartsChecklistHeaderTitle } from './components/PartsChecklistHeaderTitle';
+import { StackHeader } from './components/AppHeader';
+import { AddPartHeaderRight } from './components/AddPartHeaderRight';
+import { PartHeaderTitle } from './components/PartHeaderTitle';
+import { VehicleHeaderTitle } from './components/VehicleHeaderTitle';
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const GarageStack = createNativeStackNavigator<GarageStackParamList>();
+
+function vehicleHeaderOptions(
+  navigation: NativeStackNavigationProp<GarageStackParamList>,
+  vehicleId: string,
+) {
+  return {
+    headerTitle: () => <VehicleHeaderTitle vehicleId={vehicleId} />,
+    headerRight: () => (
+      <AddPartHeaderRight navigation={navigation} vehicleId={vehicleId} />
+    ),
+  };
+}
 
 const renderTabHeader = (props: React.ComponentProps<typeof Header>) => (
   <Header {...props} />
@@ -69,10 +79,15 @@ function MainTabs() {
         header: renderTabHeader,
         tabBarStyle: {
           backgroundColor: colors.bg,
-          borderTopColor: colors.slate400,
+          borderTopColor: colors.borderSubtle,
+          borderTopWidth: StyleSheet.hairlineWidth,
         },
-        tabBarActiveTintColor: colors.accent,
+        tabBarActiveTintColor: colors.text,
         tabBarInactiveTintColor: colors.textDim,
+        tabBarLabelStyle: {
+          fontFamily: fontFamily.medium,
+          fontSize: 11,
+        },
       }}
     >
       <Tab.Screen
@@ -88,9 +103,6 @@ function MainTabs() {
         component={BudgetScreen}
         options={{
           title: 'Budget',
-          headerShown: true,
-          headerStyle: { backgroundColor: colors.surface },
-          headerTintColor: colors.text,
           tabBarIcon: BudgetTabIcon,
         }}
       />
@@ -99,9 +111,6 @@ function MainTabs() {
         component={SettingsScreen}
         options={{
           title: 'Settings',
-          headerShown: true,
-          headerStyle: { backgroundColor: colors.surface },
-          headerTintColor: colors.text,
           tabBarIcon: SettingsTabIcon,
         }}
       />
@@ -114,11 +123,8 @@ export function RootNavigator() {
     <NavigationContainer theme={navTheme}>
       <GarageStack.Navigator
         screenOptions={{
-          headerStyle: { backgroundColor: colors.surface },
-          headerTintColor: colors.text,
-          headerTitleStyle: { fontFamily: fontFamily.bold },
+          header: StackHeader,
           contentStyle: { backgroundColor: colors.bg },
-          headerBackButtonDisplayMode: 'minimal',
         }}
       >
         <GarageStack.Screen
@@ -136,15 +142,9 @@ export function RootNavigator() {
         <GarageStack.Screen
           name="CarDashboard"
           component={CarDashboardScreen}
-          options={({ navigation, route }) => ({
-            title: '',
-            headerRight: () => CarDashboardHeaderRight({ navigation, route }),
-          })}
-        />
-        <GarageStack.Screen
-          name="PartsTracker"
-          component={PartsTrackerScreen}
-          options={{ title: 'Parts tracker' }}
+          options={({ navigation, route }) =>
+            vehicleHeaderOptions(navigation, route.params.vehicleId)
+          }
         />
         <GarageStack.Screen
           name="AddPart"
@@ -154,35 +154,13 @@ export function RootNavigator() {
           }}
         />
         <GarageStack.Screen
-          name="PartsChecklist"
-          component={PartsChecklistScreen}
-          options={({ navigation, route }) => ({
-            title: '',
-            headerTitleAlign: 'left',
-            headerStyle: { backgroundColor: colors.surface },
-            headerTitle: () => PartsChecklistHeaderTitle({ route }),
-            headerRight: () => PartsChecklistHeaderRight({ navigation, route }),
-          })}
-        />
-        <GarageStack.Screen
           name="PartDetail"
           component={PartDetailScreen}
-          options={{ title: 'Part detail' }}
-        />
-        <GarageStack.Screen
-          name="FindPart"
-          component={FindPartScreen}
-          options={{ title: 'Find part' }}
-        />
-        <GarageStack.Screen
-          name="BudgetCar"
-          component={BudgetCarScreen}
-          options={{ title: 'Budget' }}
-        />
-        <GarageStack.Screen
-          name="DataAndStorage"
-          component={DataAndStorageScreen}
-          options={{ title: 'Data & Storage' }}
+          options={({ route }) => ({
+            headerTitle: () => (
+              <PartHeaderTitle partId={route.params.partId} />
+            ),
+          })}
         />
         <GarageStack.Screen
           name="Export"
@@ -192,26 +170,17 @@ export function RootNavigator() {
         <GarageStack.Screen
           name="About"
           component={AboutScreen}
-          options={{
-            title: '',
-            headerStyle: { backgroundColor: colors.bg },
-          }}
+          options={{ title: 'About' }}
         />
         <GarageStack.Screen
           name="Licenses"
           component={LicensesScreen}
-          options={{
-            title: 'Licenses',
-            headerStyle: { backgroundColor: colors.bg },
-          }}
+          options={{ title: 'Licenses' }}
         />
         <GarageStack.Screen
           name="ApiConnection"
           component={ApiConnectionScreen}
-          options={{
-            title: 'API Connection',
-            headerStyle: { backgroundColor: colors.bg },
-          }}
+          options={{ title: 'API' }}
         />
       </GarageStack.Navigator>
     </NavigationContainer>

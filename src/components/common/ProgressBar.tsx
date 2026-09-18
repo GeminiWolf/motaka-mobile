@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
-import { colors, radius } from '../../theme';
+import { colors } from '../../theme';
 import { getProgressBarState } from '../../utils/getProgressBarState';
 
 type Props = {
@@ -17,7 +17,7 @@ type Props = {
 export function ProgressBar({
   value,
   max,
-  height = 8,
+  height = 2,
   color,
   trackColor = colors.slate600,
   warning = false,
@@ -40,7 +40,7 @@ export function ProgressBar({
       }}
       style={[
         styles.track,
-        { height, borderRadius: height / 2, backgroundColor: trackColor },
+        { height, backgroundColor: trackColor },
         style,
       ]}
     >
@@ -50,7 +50,6 @@ export function ProgressBar({
           {
             width: `${fill * 100}%`,
             height,
-            borderRadius: height / 2,
             backgroundColor: fillColor,
           },
         ]}
@@ -63,7 +62,6 @@ const styles = StyleSheet.create({
   track: {
     width: '100%',
     overflow: 'hidden',
-    borderRadius: radius.sm,
   },
   fill: {
     minWidth: 0,

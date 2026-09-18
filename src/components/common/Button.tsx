@@ -36,8 +36,8 @@ const RADIUS_VALUES: Record<Radius, number> = {
 
 const DEFAULT_RADIUS: Record<Size, Radius> = {
   sm: 'sm',
-  md: 'md',
-  lg: 'md',
+  md: 'sm',
+  lg: 'sm',
 };
 
 export function Button({
@@ -134,20 +134,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
   },
   secondary: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
+    backgroundColor: 'transparent',
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
   },
   danger: {
-    backgroundColor: 'rgba(244, 63, 94, 0.15)',
-    borderWidth: 1,
+    backgroundColor: 'transparent',
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.danger,
   },
   ghost: {
     backgroundColor: 'transparent',
   },
   pressed: {
-    opacity: 0.85,
+    opacity: 0.72,
   },
   disabled: {
     opacity: 0.45,

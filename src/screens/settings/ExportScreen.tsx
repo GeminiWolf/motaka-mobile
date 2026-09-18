@@ -6,15 +6,13 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { Car } from 'lucide-react-native';
 
-import { Card } from '../../components/common/Card';
 import { EmptyState } from '../../components/common/EmptyState';
 import { List } from '../../components/common/List';
 import { Text } from '../../components/common/Text';
 import { ApiError, exportVehiclePdf } from '../../services/api';
 import { useGarageStore } from '../../store/garageStore';
-import { colors, spacing } from '../../theme';
+import { colors, layout, spacing } from '../../theme';
 import type { Vehicle } from '../../types';
 import {
   buildGarageExportPayload,
@@ -67,8 +65,8 @@ export default function ExportScreen() {
     }
 
     Alert.alert(
-      'Export vehicle',
-      'This sends this vehicle, its tracked parts, and related budget settings to the server to generate a PDF.',
+      'Export this build',
+      'Sends this car, its parts, and budget settings to generate a PDF.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -85,40 +83,36 @@ export default function ExportScreen() {
     <View style={styles.container}>
       {vehicles.length === 0 ? (
         <EmptyState
-          icon={<Car size={40} color={colors.textDim} />}
-          title="No vehicles to export"
-          subtitle="Add a vehicle to your garage before exporting."
+          title="Nothing to export"
+          subtitle="Add a car to the garage first."
         />
       ) : (
         <ScrollView contentContainerStyle={styles.contentContainer}>
-          <Text size="xs" tone="dim" weight="bold">
-            VEHICLES
+          <Text tone="muted">
+            Export one build at a time. The PDF is generated on the server.
           </Text>
-          <Card radius="md" padding="md">
-            <List.View>
-              {vehicles.map(vehicle => {
-                const partCount = getTrackedPartsForVehicle(
-                  trackedParts,
-                  vehicle.id,
-                ).length;
-                const isExporting = exportingVehicleId === vehicle.id;
-                return (
-                  <List.Item
-                    key={vehicle.id}
-                    icon="Car"
-                    label={getVehicleExportLabel(vehicle)}
-                    description={getPartsExportDescription(partCount)}
-                    onPress={() => exportVehicle(vehicle)}
-                    rightSection={
-                      isExporting ? (
-                        <ActivityIndicator color={colors.accent} />
-                      ) : undefined
-                    }
-                  />
-                );
-              })}
-            </List.View>
-          </Card>
+          <List.View>
+            {vehicles.map(vehicle => {
+              const partCount = getTrackedPartsForVehicle(
+                trackedParts,
+                vehicle.id,
+              ).length;
+              const isExporting = exportingVehicleId === vehicle.id;
+              return (
+                <List.Item
+                  key={vehicle.id}
+                  label={getVehicleExportLabel(vehicle)}
+                  description={getPartsExportDescription(partCount)}
+                  onPress={() => exportVehicle(vehicle)}
+                  rightSection={
+                    isExporting ? (
+                      <ActivityIndicator color={colors.accent} />
+                    ) : undefined
+                  }
+                />
+              );
+            })}
+          </List.View>
         </ScrollView>
       )}
     </View>
@@ -129,9 +123,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
+    paddingHorizontal: layout.gutter,
   },
   contentContainer: {
-    padding: spacing.lg,
-    gap: spacing.sm,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xl,
+    gap: spacing.md,
   },
 });

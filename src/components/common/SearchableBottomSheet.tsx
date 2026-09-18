@@ -1,17 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
-  Modal,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, fontFamily, radius, spacing, typography } from '../../theme';
-import { WINDOW_HEIGHT } from '../../utils/device';
-import ButtonIcon from './ButtonIcon';
+import { colors, fontFamily, spacing, typography } from '../../theme';
+import { SkeletonList } from './Skeleton';
+import { SheetFrame } from './SheetFrame';
 
 export type SearchableOption = {
   key: string;
@@ -26,6 +24,8 @@ type Props = {
   searchable?: boolean;
   searchPlaceholder?: string;
   emptyLabel?: string;
+  loading?: boolean;
+  closeOnSelect?: boolean;
   onClose: () => void;
   onSelect: (option: SearchableOption) => void;
 };
@@ -38,17 +38,16 @@ export function SearchableBottomSheet({
   searchable = true,
   searchPlaceholder = 'Search…',
   emptyLabel = 'No matches',
+  loading = false,
+  closeOnSelect = true,
   onClose,
   onSelect,
 }: Props) {
-  const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
 
   useEffect(() => {
-    if (visible) {
-      setQuery('');
-    }
-  }, [visible]);
+    setQuery('');
+  }, [title, visible]);
 
   const filtered = useMemo(() => {
     if (!searchable) {
@@ -61,16 +60,19 @@ export function SearchableBottomSheet({
     return options.filter(opt => opt.label.toLowerCase().includes(q));
   }, [options, query, searchable]);
 
-  const renderOption = (item: SearchableOption) => {
+  const selectOption = (item: SearchableOption) => {
+    onSelect(item);
+    if (closeOnSelect) {
+      onClose();
+    }
+  };
+
+  const renderOption = ({ item }: { item: SearchableOption }) => {
     const selected = item.key === selectedKey;
     return (
       <Pressable
-        key={item.key}
-        style={[styles.option, selected && styles.optionSelected]}
-        onPress={() => {
-          onSelect(item);
-          onClose();
-        }}
+        style={styles.option}
+        onPress={() => selectOption(item)}
         accessibilityRole="button"
         accessibilityLabel={item.label}
         accessibilityState={{ selected }}
@@ -85,105 +87,53 @@ export function SearchableBottomSheet({
   };
 
   return (
-    <Modal
+    <SheetFrame
       visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      title={title}
+      onClose={onClose}
+      compact={!searchable}
     >
-      <View style={styles.root}>
-        <Pressable style={styles.backdrop} onPress={onClose} />
-        <View
-          style={[
-            styles.sheet,
-            { height: WINDOW_HEIGHT - insets.top },
-            !searchable && styles.sheetCompact,
-            { paddingBottom: Math.max(insets.bottom, spacing.md) },
-          ]}
-        >
-          <View style={styles.handle} />
-          <View style={styles.header}>
-            <Text style={styles.title}>{title}</Text>
-            <ButtonIcon icon="X" variant="secondary" onPress={onClose} />
-          </View>
-          {searchable ? (
-            <>
-              <TextInput
-                style={styles.search}
-                value={query}
-                onChangeText={setQuery}
-                placeholder={searchPlaceholder}
-                placeholderTextColor={colors.textDim}
-                autoCapitalize="none"
-                autoCorrect={false}
-                clearButtonMode="while-editing"
-                accessibilityLabel={`Search ${title}`}
-              />
-              <FlatList
-                data={filtered}
-                keyExtractor={item => item.key}
-                keyboardShouldPersistTaps="handled"
-                style={styles.list}
-                ListEmptyComponent={
-                  <Text style={styles.empty}>{emptyLabel}</Text>
-                }
-                renderItem={({ item }) => renderOption(item)}
-              />
-            </>
-          ) : (
-            <View>{filtered.map(renderOption)}</View>
-          )}
+      {searchable ? (
+        <TextInput
+          style={styles.search}
+          value={query}
+          onChangeText={setQuery}
+          placeholder={searchPlaceholder}
+          placeholderTextColor={colors.textDim}
+          autoCapitalize="none"
+          autoCorrect={false}
+          clearButtonMode="while-editing"
+          accessibilityLabel={`Search ${title}`}
+        />
+      ) : null}
+      {loading ? (
+        <SkeletonList count={6} />
+      ) : searchable ? (
+        <FlatList
+          data={filtered}
+          keyExtractor={item => item.key}
+          keyboardShouldPersistTaps="handled"
+          style={styles.list}
+          ListEmptyComponent={<Text style={styles.empty}>{emptyLabel}</Text>}
+          renderItem={renderOption}
+        />
+      ) : (
+        <View>
+          {filtered.map(item => (
+            <View key={item.key}>{renderOption({ item })}</View>
+          ))}
         </View>
-      </View>
-    </Modal>
+      )}
+    </SheetFrame>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: colors.overlay,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-  },
-  sheetCompact: {
-    height: undefined,
-  },
-  handle: {
-    alignSelf: 'center',
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.border,
-    marginBottom: spacing.md,
-  },
-  title: {
-    ...typography.subtitle,
-    color: colors.text,
-  },
   search: {
-    backgroundColor: colors.bg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
+    backgroundColor: 'transparent',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+    paddingHorizontal: 0,
     paddingVertical: spacing.md,
     color: colors.text,
     fontFamily: fontFamily.regular,
@@ -195,26 +145,20 @@ const styles = StyleSheet.create({
   empty: {
     ...typography.caption,
     color: colors.textMuted,
-    textAlign: 'center',
     paddingVertical: spacing.xl,
   },
   option: {
+    minHeight: 48,
+    justifyContent: 'center',
     paddingVertical: spacing.md,
-    paddingHorizontal: spacing.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.borderSubtle,
-  },
-  optionSelected: {
-    backgroundColor: colors.accentSoft,
-    borderRadius: radius.sm,
-    borderBottomWidth: 0,
   },
   optionText: {
     ...typography.body,
     color: colors.text,
   },
   optionTextSelected: {
-    color: colors.accent,
     fontFamily: fontFamily.semibold,
   },
 });

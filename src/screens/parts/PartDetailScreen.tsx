@@ -12,6 +12,7 @@ import type {GarageStackParamList} from '../../navigation/types';
 import {useGarageStore} from '../../store/garageStore';
 import type {PartPriority, PartStatus} from '../../types';
 import {spacing} from '../../theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'PartDetail'>;
 
@@ -20,6 +21,8 @@ const STATUSES: PartStatus[] = ['needed', 'sourcing', 'ordered', 'installed'];
 const SAVE_DEBOUNCE_MS = 500;
 
 type PartDraft = {
+  name: string;
+  partNumber: string;
   estimatedCost: string;
   actualCost: string;
   source: string;
@@ -27,12 +30,15 @@ type PartDraft = {
 };
 
 export function PartDetailScreen({navigation, route}: Props) {
+  const { bottom } = useSafeAreaInsets();
   const {partId} = route.params;
   const part = useGarageStore(s => s.trackedParts.find(p => p.id === partId));
   const updateTrackedPart = useGarageStore(s => s.updateTrackedPart);
   const removeTrackedPart = useGarageStore(s => s.removeTrackedPart);
 
   const [draft, setDraft] = useState<PartDraft>({
+    name: '',
+    partNumber: '',
     estimatedCost: '',
     actualCost: '',
     source: '',
@@ -47,6 +53,8 @@ export function PartDetailScreen({navigation, route}: Props) {
       return;
     }
     setDraft({
+      name: part.name,
+      partNumber: part.partNumber,
       estimatedCost:
         part.estimatedCost != null ? String(part.estimatedCost) : '',
       actualCost: part.actualCost != null ? String(part.actualCost) : '',
@@ -79,6 +87,8 @@ export function PartDetailScreen({navigation, route}: Props) {
       return;
     }
     updateTrackedPart(part.id, {
+      name: next.name.trim() || part.name,
+      partNumber: next.partNumber.trim() || part.partNumber,
       estimatedCost: Number(next.estimatedCost) || 0,
       actualCost:
         next.actualCost.trim() === ''
@@ -123,15 +133,9 @@ export function PartDetailScreen({navigation, route}: Props) {
   return (
     <Screen scroll>
       <View style={styles.headerRow}>
-        <View style={styles.headerText}>
-          <Text variant="hero">{part.name}</Text>
-          <Text variant="mono" tone="muted" style={styles.number}>
-            #{part.partNumber}
-          </Text>
-          <Text variant="caption" tone="dim">
-            {part.category}
-          </Text>
-        </View>
+        <Text variant="caption" tone="dim">
+          {part.category}
+        </Text>
         {savedVisible ? (
           <Text variant="caption" tone="accent" weight="semibold">
             Saved
@@ -139,7 +143,20 @@ export function PartDetailScreen({navigation, route}: Props) {
         ) : null}
       </View>
 
-      <SectionHeader title="Status" subtitle="Tap to update" />
+      <Input
+        label="Name"
+        value={draft.name}
+        onChangeText={v => updateDraftField('name', v)}
+        containerStyle={styles.field}
+      />
+      <Input
+        label="Part number"
+        value={draft.partNumber}
+        onChangeText={v => updateDraftField('partNumber', v)}
+        containerStyle={styles.field}
+      />
+
+      <SectionHeader title="Status" />
       <View style={styles.chips}>
         {STATUSES.map(s => (
           <Chip
@@ -147,14 +164,14 @@ export function PartDetailScreen({navigation, route}: Props) {
             label={s}
             selected={part.status === s}
             onPress={() => {
-              updateTrackedPart(part.id, {status: s});
+              updateTrackedPart(part.id, { status: s });
               flashSaved();
             }}
           />
         ))}
       </View>
 
-      <SectionHeader title="Priority" subtitle="Tap to update" />
+      <SectionHeader title="Priority" />
       <View style={styles.chips}>
         {PRIORITIES.map(p => (
           <Chip
@@ -162,7 +179,7 @@ export function PartDetailScreen({navigation, route}: Props) {
             label={p}
             selected={part.priority === p}
             onPress={() => {
-              updateTrackedPart(part.id, {priority: p});
+              updateTrackedPart(part.id, { priority: p });
               flashSaved();
             }}
           />
@@ -197,11 +214,11 @@ export function PartDetailScreen({navigation, route}: Props) {
       />
 
       <Button
-        label="Delete tracked part"
+        label="Remove from this build"
         variant="danger"
         onPress={() => {
           Alert.alert('Delete part', 'Remove this part from the tracker?', [
-            {text: 'Cancel', style: 'cancel'},
+            { text: 'Cancel', style: 'cancel' },
             {
               text: 'Delete',
               style: 'destructive',
@@ -212,7 +229,7 @@ export function PartDetailScreen({navigation, route}: Props) {
             },
           ]);
         }}
-        style={{marginTop: spacing.xl}}
+        style={{ marginTop: spacing.xl, marginBottom: bottom + spacing.md }}
       />
     </Screen>
   );
@@ -221,16 +238,9 @@ export function PartDetailScreen({navigation, route}: Props) {
 const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: spacing.lg,
-  },
-  headerText: {
-    flex: 1,
-    paddingRight: spacing.md,
-  },
-  number: {
-    marginTop: 4,
   },
   chips: {
     flexDirection: 'row',

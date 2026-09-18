@@ -1,12 +1,11 @@
 import React from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
-import { Car } from 'lucide-react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import type { CompositeScreenProps } from '@react-navigation/native';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Badge } from '@react-navigation/elements';
 
 import { EmptyState } from '../../components/common/EmptyState';
+import { Screen } from '../../components/common/Screen';
 import { Text } from '../../components/common/Text';
 import { VehicleCard } from '../../components/garage/VehicleCard';
 import type {
@@ -14,7 +13,9 @@ import type {
   RootTabParamList,
 } from '../../navigation/types';
 import { useGarageStore } from '../../store/garageStore';
-import { colors, spacing } from '../../theme';
+import { confirmRemoveVehicle } from '../../utils/confirmRemoveVehicle';
+import { formatVehicleName } from '../../utils/formatVehicleName';
+import { layout, spacing } from '../../theme';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<RootTabParamList, 'GarageTab'>,
@@ -22,50 +23,58 @@ type Props = CompositeScreenProps<
 >;
 
 export function GarageHomeScreen({ navigation }: Props) {
+  const hasHydrated = useGarageStore(s => s.hasHydrated);
   const vehicles = useGarageStore(s => s.vehicles);
   const trackedParts = useGarageStore(s => s.trackedParts);
+  const removeVehicle = useGarageStore(s => s.removeVehicle);
+
+  if (!hasHydrated) {
+    return <Screen loading />;
+  }
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, styles.row, styles.spaceBetween]}>
-        <View style={styles.headerContent}>
-          <Text tone="info" style={styles.brand} size="2xl" weight="semibold">
-            My Garage
-          </Text>
-          <Text size="sm">Track active car builds & missing components</Text>
-        </View>
-        <View>
-          <Badge visible={true} size={25} style={styles.badge}>
-            {`${vehicles.length} vehicles`}
-          </Badge>
-        </View>
-      </View>
       {vehicles.length === 0 ? (
-        <EmptyState
-          icon={<Car size={40} color={colors.textDim} />}
-          title="Garage is empty"
-          subtitle="Add a vehicle to start tracking parts and budget."
-          actionLabel="Add vehicle"
-          onAction={() => navigation.navigate('AddVehicle')}
-        />
+        <View style={styles.empty}>
+          <EmptyState
+            title="No cars in the workshop"
+            subtitle="Add the vehicle you’re building. Parts, spend, and what’s still missing live on that car."
+            actionLabel="Add vehicle"
+            onAction={() => navigation.navigate('AddVehicle')}
+          />
+        </View>
       ) : (
         <FlatList
           keyExtractor={item => item.id}
           data={vehicles}
-          onRefresh={() => {}}
-          refreshing={false}
-          onEndReached={() => {}}
-          contentContainerStyle={styles.contentContainer}
+          contentContainerStyle={styles.list}
           renderItem={({ item }) => (
             <VehicleCard
               vehicle={item}
               parts={trackedParts.filter(p => p.vehicleId === item.id)}
               onPress={() => {
-                useGarageStore.getState().setActiveVehicleId(item.id);
                 navigation.navigate('CarDashboard', { vehicleId: item.id });
+              }}
+              onLongPress={() => {
+                confirmRemoveVehicle(formatVehicleName(item), () => {
+                  removeVehicle(item.id);
+                });
               }}
             />
           )}
+          ListFooterComponent={
+            <Pressable
+              onPress={() => navigation.navigate('AddVehicle')}
+              accessibilityRole="button"
+              accessibilityLabel="Add another vehicle"
+              style={({ pressed }) => [
+                styles.footerAdd,
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text weight="medium">Add another vehicle</Text>
+            </Pressable>
+          }
         />
       )}
     </View>
@@ -75,40 +84,20 @@ export function GarageHomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: spacing.lg,
   },
-  header: {
-    paddingTop: spacing.lg,
-    paddingHorizontal: spacing.lg,
+  empty: {
+    paddingHorizontal: layout.gutter,
   },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  list: {
+    paddingHorizontal: layout.gutter,
+    paddingBottom: layout.gutter,
   },
-  headerContent: {
-    flex: 1,
-    gap: spacing.xs,
+  footerAdd: {
+    minHeight: layout.rowMinHeight,
+    justifyContent: 'center',
+    paddingVertical: spacing.md,
   },
-  spaceBetween: {
-    justifyContent: 'space-between',
-  },
-  badge: {
-    backgroundColor: colors.accentSoft,
-    color: colors.accent,
-    borderWidth: 1,
-    borderColor: colors.accent,
-    fontSize: 14,
-    paddingHorizontal: spacing.sm,
-  },
-  brand: {
-    color: colors.white,
-  },
-  addBtn: {
-    minHeight: 36,
-    paddingHorizontal: spacing.md,
-  },
-  contentContainer: {
-    marginHorizontal: spacing.lg,
-    gap: spacing.md,
+  pressed: {
+    opacity: 0.72,
   },
 });

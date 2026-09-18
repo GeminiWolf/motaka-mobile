@@ -1,13 +1,17 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import { Button } from '../../components/common/Button';
+import { Input } from '../../components/common/Input';
 import { SearchableBottomSheet } from '../../components/common/SearchableBottomSheet';
 import type {GarageStackParamList} from '../../navigation/types';
 import {
@@ -23,7 +27,8 @@ import type {
   VariantOption,
   YearOption,
 } from '../../types';
-import {colors, radius, spacing, typography} from '../../theme';
+import {colors, fontFamily, layout, spacing, typography} from '../../theme';
+import { parseVehicleYear } from '../../utils/parseVehicleYear';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'AddVehicle'>;
 type SheetKind = 'makes' | 'models' | 'years' | 'variants';
@@ -32,6 +37,12 @@ export function AddVehicleScreen({navigation}: Props) {
   const apiBaseUrl = useGarageStore(s => s.settings.apiBaseUrl);
   const region = useGarageStore(s => s.settings.region);
   const addVehicle = useGarageStore(s => s.addVehicle);
+
+  const [manual, setManual] = useState(false);
+  const [manualYear, setManualYear] = useState('');
+  const [manualMake, setManualMake] = useState('');
+  const [manualModel, setManualModel] = useState('');
+  const [manualTrim, setManualTrim] = useState('');
 
   const [makes, setMakes] = useState<MakeOption[]>([]);
   const [selectedMake, setSelectedMake] = useState<MakeOption | null>(null);
@@ -94,6 +105,8 @@ export function AddVehicleScreen({navigation}: Props) {
           setSelectedModel(null);
           setModelYears([]);
           setSelectedModelYear(null);
+          setVariants([]);
+          setSelectedVariant(null);
         }
       })
       .catch(err => {
@@ -124,6 +137,8 @@ export function AddVehicleScreen({navigation}: Props) {
         if (!cancelled) {
           setModelYears(data);
           setSelectedModelYear(null);
+          setVariants([]);
+          setSelectedVariant(null);
         }
       })
       .catch(err => {
@@ -167,6 +182,9 @@ export function AddVehicleScreen({navigation}: Props) {
           setLoadingVariants(false);
         }
       });
+    return () => {
+      cancelled = true;
+    };
   }, [selectedModel, selectedModelYear, apiBaseUrl]);
 
   const makeOptions = useMemo(
@@ -194,10 +212,13 @@ export function AddVehicleScreen({navigation}: Props) {
           options: makeOptions,
           selectedKey: selectedMake?.id,
           searchPlaceholder: 'Search makes',
+          loading: loadingMakes,
+          emptyLabel: 'No makes for this region',
           onSelect: (key: string) => {
             const make = makes.find(m => m.id === key) ?? null;
             setSelectedMake(make);
             setValidationError('');
+            setOpenSheet('models');
           },
         };
       case 'models':
@@ -206,10 +227,13 @@ export function AddVehicleScreen({navigation}: Props) {
           options: modelOptions,
           selectedKey: selectedModel?.id,
           searchPlaceholder: 'Search models',
+          loading: loadingModels,
+          emptyLabel: 'No models for this make',
           onSelect: (key: string) => {
             const model = models.find(m => m.id === key) ?? null;
             setSelectedModel(model);
             setValidationError('');
+            setOpenSheet('years');
           },
         };
       case 'years':
@@ -218,10 +242,13 @@ export function AddVehicleScreen({navigation}: Props) {
           options: yearOptions,
           selectedKey: selectedModelYear?.id,
           searchPlaceholder: 'Search years',
+          loading: loadingYears,
+          emptyLabel: 'No years for this model',
           onSelect: (key: string) => {
             const year = modelYears.find(y => y.id === key) ?? null;
             setSelectedModelYear(year);
             setValidationError('');
+            setOpenSheet('variants');
           },
         };
       case 'variants':
@@ -230,10 +257,13 @@ export function AddVehicleScreen({navigation}: Props) {
           options: variantOptions,
           selectedKey: selectedVariant?.id,
           searchPlaceholder: 'Search variants',
+          loading: loadingVariants,
+          emptyLabel: 'No variants for this year',
           onSelect: (key: string) => {
             const variant = variants.find(v => v.id === key) ?? null;
             setSelectedVariant(variant);
             setValidationError('');
+            setOpenSheet(null);
           },
         };
       default:
@@ -253,9 +283,13 @@ export function AddVehicleScreen({navigation}: Props) {
     selectedModel?.id,
     selectedModelYear?.id,
     selectedVariant?.id,
+    loadingMakes,
+    loadingModels,
+    loadingYears,
+    loadingVariants,
   ]);
 
-  const save = () => {
+  const saveCatalogue = () => {
     if (
       !selectedMake ||
       !selectedModel ||
@@ -277,79 +311,162 @@ export function AddVehicleScreen({navigation}: Props) {
       make: selectedMake.name,
       model: selectedModel.name,
       trim: selectedVariant.trim,
-      modelYearId: selectedModelYear.id,
+    });
+    navigation.replace('CarDashboard', {vehicleId: id});
+  };
+
+  const saveManual = () => {
+    const year = parseVehicleYear(manualYear);
+    const make = manualMake.trim();
+    const model = manualModel.trim();
+    if (year == null || !make || !model) {
+      setValidationError('Enter year, make, and model.');
+      return;
+    }
+    setValidationError('');
+    const id = addVehicle({
+      year,
+      make,
+      model,
+      trim: manualTrim.trim(),
     });
     navigation.replace('CarDashboard', {vehicleId: id});
   };
 
   return (
-    <View style={styles.container}>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      {validationError ? (
-        <Text style={styles.error}>{validationError}</Text>
-      ) : null}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.flex}
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.intro}>
+          {manual
+            ? 'Enter the car yourself if it isn’t in the catalogue.'
+            : 'Pick the car from the catalogue. Each choice keeps the list open for the next step.'}
+        </Text>
+        {error && !manual ? <Text style={styles.error}>{error}</Text> : null}
+        {validationError ? (
+          <Text style={styles.error}>{validationError}</Text>
+        ) : null}
 
-      <View style={styles.block}>
-        <FieldButton
-          label="Make"
-          value={selectedMake?.name || 'Choose make'}
-          hint={loadingMakes ? 'Loading makes…' : undefined}
-          loading={loadingMakes}
-          onPress={() => setOpenSheet('makes')}
-        />
-        <FieldButton
-          label="Model"
-          value={selectedModel?.name || 'Choose model'}
-          hint={
-            !selectedMake
-              ? 'Pick a make first'
-              : loadingModels
-              ? 'Loading models…'
-              : undefined
-          }
-          disabled={!selectedMake || loadingModels}
-          loading={loadingModels}
-          onPress={() => setOpenSheet('models')}
-        />
-        <FieldButton
-          label="Year"
-          value={
-            selectedModelYear ? String(selectedModelYear.year) : 'Choose year'
-          }
-          hint={
-            !selectedModel
-              ? 'Pick a model first'
-              : loadingYears
-              ? 'Loading years…'
-              : undefined
-          }
-          disabled={!selectedModel || loadingYears}
-          loading={loadingYears}
-          onPress={() => setOpenSheet('years')}
-        />
-        <FieldButton
-          label="Variant"
-          value={
-            selectedVariant ? String(selectedVariant.name) : 'Choose variant'
-          }
-          hint={
-            !selectedModelYear
-              ? 'Pick a year first'
-              : loadingVariants
-              ? 'Loading variants…'
-              : undefined
-          }
-          disabled={!selectedModelYear || loadingVariants}
-          loading={loadingVariants}
-          onPress={() => setOpenSheet('variants')}
-        />
-        <Button
-          label="Save to garage"
-          onPress={save}
-          disabled={loadingMakes || loadingModels || loadingYears}
-          style={{ marginTop: spacing.md }}
-        />
-      </View>
+        {manual ? (
+          <View>
+            <Input
+              label="Year"
+              value={manualYear}
+              onChangeText={setManualYear}
+              keyboardType="number-pad"
+              containerStyle={styles.manualField}
+            />
+            <Input
+              label="Make"
+              value={manualMake}
+              onChangeText={setManualMake}
+              containerStyle={styles.manualField}
+            />
+            <Input
+              label="Model"
+              value={manualModel}
+              onChangeText={setManualModel}
+              containerStyle={styles.manualField}
+            />
+            <Input
+              label="Trim"
+              value={manualTrim}
+              onChangeText={setManualTrim}
+              helper="Optional"
+              containerStyle={styles.manualField}
+            />
+            <Button label="Save to garage" onPress={saveManual} />
+            <Pressable
+              onPress={() => {
+                setManual(false);
+                setValidationError('');
+              }}
+              style={styles.modeLink}
+            >
+              <Text style={styles.modeLinkText}>Back to catalogue</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <View>
+            <FieldButton
+              label="Make"
+              value={selectedMake?.name || 'Choose make'}
+              hint={loadingMakes ? 'Loading makes…' : undefined}
+              loading={loadingMakes}
+              onPress={() => setOpenSheet('makes')}
+            />
+            <FieldButton
+              label="Model"
+              value={selectedModel?.name || 'Choose model'}
+              hint={
+                !selectedMake
+                  ? 'Pick a make first'
+                  : loadingModels
+                  ? 'Loading models…'
+                  : undefined
+              }
+              disabled={!selectedMake}
+              loading={loadingModels}
+              onPress={() => setOpenSheet('models')}
+            />
+            <FieldButton
+              label="Year"
+              value={
+                selectedModelYear ? String(selectedModelYear.year) : 'Choose year'
+              }
+              hint={
+                !selectedModel
+                  ? 'Pick a model first'
+                  : loadingYears
+                  ? 'Loading years…'
+                  : undefined
+              }
+              disabled={!selectedModel}
+              loading={loadingYears}
+              onPress={() => setOpenSheet('years')}
+            />
+            <FieldButton
+              label="Variant"
+              value={
+                selectedVariant ? String(selectedVariant.name) : 'Choose variant'
+              }
+              hint={
+                !selectedModelYear
+                  ? 'Pick a year first'
+                  : loadingVariants
+                  ? 'Loading variants…'
+                  : undefined
+              }
+              disabled={!selectedModelYear}
+              loading={loadingVariants}
+              onPress={() => setOpenSheet('variants')}
+            />
+            <Button
+              label="Save to garage"
+              onPress={saveCatalogue}
+              disabled={!selectedVariant}
+              style={styles.save}
+            />
+            <Pressable
+              onPress={() => {
+                setManual(true);
+                setOpenSheet(null);
+                setValidationError('');
+              }}
+              style={styles.modeLink}
+            >
+              <Text style={styles.modeLinkText}>
+                Not in the catalogue? Enter it yourself
+              </Text>
+            </Pressable>
+          </View>
+        )}
+      </ScrollView>
 
       <SearchableBottomSheet
         visible={sheetConfig != null}
@@ -357,10 +474,13 @@ export function AddVehicleScreen({navigation}: Props) {
         options={sheetConfig?.options ?? []}
         selectedKey={sheetConfig?.selectedKey?.toString() ?? ''}
         searchPlaceholder={sheetConfig?.searchPlaceholder}
+        emptyLabel={sheetConfig?.emptyLabel}
+        loading={sheetConfig?.loading}
+        closeOnSelect={false}
         onClose={() => setOpenSheet(null)}
         onSelect={option => sheetConfig?.onSelect(option.key)}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -399,11 +519,18 @@ function FieldButton({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: spacing.md,
+  flex: {
+    flex: 1,
   },
-  block: {
-    gap: spacing.sm,
+  container: {
+    paddingHorizontal: layout.gutter,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xxl,
+  },
+  intro: {
+    ...typography.body,
+    color: colors.textMuted,
+    marginBottom: spacing.xl,
   },
   error: {
     ...typography.caption,
@@ -411,12 +538,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   field: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
+    paddingVertical: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.borderSubtle,
   },
   disabled: {
     opacity: 0.45,
@@ -432,12 +556,28 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   fieldValue: {
-    ...typography.body,
+    ...typography.subtitle,
     color: colors.text,
   },
   fieldHint: {
     ...typography.caption,
     color: colors.textDim,
     marginTop: 4,
+  },
+  save: {
+    marginTop: spacing.lg,
+  },
+  manualField: {
+    marginBottom: spacing.sm,
+  },
+  modeLink: {
+    minHeight: 44,
+    justifyContent: 'center',
+    marginTop: spacing.md,
+  },
+  modeLinkText: {
+    ...typography.body,
+    color: colors.text,
+    fontFamily: fontFamily.medium,
   },
 });

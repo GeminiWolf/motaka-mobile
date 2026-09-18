@@ -13,7 +13,7 @@ import type {
   VariantOption,
   VehicleVariant,
   YearOption,
-} from '../types';
+} from '../types/catalog';
 import type { GarageExportPayload } from '../utils/garageExport';
 import {
   arrayBufferToBase64,

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Check } from 'lucide-react-native';
-import { colors, radius, spacing } from '../../theme';
+import { colors, spacing } from '../../theme';
 
 type Props = {
   checked?: boolean;
@@ -35,7 +35,7 @@ export function Checkbox({
         {
           width: size,
           height: size,
-          borderRadius: Math.max(radius.sm - 2, 4),
+          borderRadius: 2,
         },
         checked && styles.checked,
         disabled && styles.disabled,

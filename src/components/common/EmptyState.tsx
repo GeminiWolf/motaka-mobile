@@ -1,7 +1,8 @@
 import React, {ReactNode} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
-import {colors, spacing, typography} from '../../theme';
+import {StyleSheet, View} from 'react-native';
+import {spacing} from '../../theme';
 import {Button} from './Button';
+import {Text} from './Text';
 
 type Props = {
   icon?: ReactNode;
@@ -12,7 +13,6 @@ type Props = {
 };
 
 export function EmptyState({
-  icon,
   title,
   subtitle,
   actionLabel,
@@ -20,9 +20,12 @@ export function EmptyState({
 }: Props) {
   return (
     <View style={styles.container}>
-      {icon ? <View accessible={false}>{icon}</View> : null}
-      <Text style={styles.title}>{title}</Text>
-      {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+      <Text variant="title">{title}</Text>
+      {subtitle ? (
+        <Text variant="body" tone="muted" style={styles.subtitle}>
+          {subtitle}
+        </Text>
+      ) : null}
       {actionLabel && onAction ? (
         <Button
           label={actionLabel}
@@ -36,22 +39,13 @@ export function EmptyState({
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'center',
     paddingVertical: spacing.xxl,
-    paddingHorizontal: spacing.xl,
     gap: spacing.sm,
   },
-  title: {
-    ...typography.subtitle,
-    color: colors.text,
-    textAlign: 'center',
-    marginTop: spacing.sm,
-  },
   subtitle: {
-    ...typography.body,
-    color: colors.textMuted,
-    textAlign: 'center',
+    maxWidth: 280,
   },
   button: {
     marginTop: spacing.md,

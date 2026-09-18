@@ -1,33 +1,38 @@
 import { Linking, StyleSheet, View } from 'react-native';
 import React from 'react';
+import { useNavigation } from '@react-navigation/native';
 
 import { Text } from '../../components/common/Text';
-import { colors, spacing } from '../../theme';
+import { colors, layout, spacing } from '../../theme';
 import { Button } from '../../components/common/Button';
-import GarageForgeIcon from '../../assets/GarageForgeIcon';
 import { PRIVACY_POLICY_URL } from '../../config';
 import { version } from '../../../package.json';
 
 export default function AboutScreen() {
+  const navigation = useNavigation();
+
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <View>
-          <Text size="2xl">Garage Forge</Text>
-          <Text align="center" tone="dim" size="lg">
-            Version {version}
-          </Text>
-        </View>
-        <View style={styles.content}>
-          <GarageForgeIcon size={80} />
-        </View>
-        <Text>2026</Text>
+      <Text variant="hero">Garage Forge</Text>
+      <Text tone="muted" style={styles.lede}>
+        A workshop log for the cars you’re building and the parts they still
+        need.
+      </Text>
+      <Text size="sm" tone="dim">
+        Version {version}
+      </Text>
+      <View style={styles.actions}>
         <Button
-          label="Privacy Policy"
-          radius="full"
+          label="Privacy policy"
+          variant="ghost"
           onPress={() => {
             Linking.openURL(PRIVACY_POLICY_URL);
           }}
+        />
+        <Button
+          label="Licenses"
+          variant="ghost"
+          onPress={() => navigation.navigate('Licenses')}
         />
       </View>
     </View>
@@ -38,12 +43,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: layout.gutter,
+    paddingTop: spacing.xl,
+    gap: spacing.md,
   },
-  content: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.xxl,
+  lede: {
+    maxWidth: 320,
+  },
+  actions: {
+    marginTop: spacing.lg,
+    alignItems: 'flex-start',
+    gap: spacing.sm,
   },
 });

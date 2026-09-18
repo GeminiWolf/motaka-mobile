@@ -7,7 +7,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
-import { colors, radius, spacing } from '../../theme';
+import { colors, spacing } from '../../theme';
 import { getListItemAccessibilityLabel } from './listHelpers';
 import { getListIcon, type ListIconName } from './listIcons';
 import { Divider } from './Divider';
@@ -62,19 +62,16 @@ function ListItem({
   const content = (
     <>
       {Icon != null ? (
-        <View style={styles.iconWrap} accessible={false}>
-          <Icon size={18} color={colors.accent} />
+        <View accessible={false}>
+          <Icon size={18} color={colors.textDim} />
         </View>
       ) : null}
       <View style={styles.body}>
-        <Text tone="white" weight="semibold">
-          {label}
-        </Text>
+        <Text weight="medium">{label}</Text>
         {description != null && description !== '' ? (
           <Text
             size="sm"
             tone="muted"
-            weight="semibold"
             numberOfLines={1}
             ellipsizeMode="middle"
           >
@@ -87,7 +84,7 @@ function ListItem({
       ) : (
         <View style={styles.chevronWrap}>
           {value && (
-            <Text tone="accent" size="sm">
+            <Text tone="muted" size="sm">
               {value}
             </Text>
           )}
@@ -137,19 +134,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     paddingVertical: spacing.md,
+    minHeight: 52,
   },
   pressed: {
-    opacity: 0.85,
-  },
-  iconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.sm,
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    alignItems: 'center',
-    justifyContent: 'center',
+    opacity: 0.72,
   },
   body: {
     flex: 1,
