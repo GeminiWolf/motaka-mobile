@@ -49,7 +49,7 @@ export function mapCategory(raw: PartCategory): PartCategoryOption {
   return {
     id: String(raw.id),
     name: raw.name,
-    parentId: raw.parentId != null ? String(raw.parentId) : undefined,
+    parent_id: raw.parent_id ?? null,
   };
 }
 
@@ -207,10 +207,7 @@ export async function getCategories(
 ): Promise<PartCategoryOption[]> {
   const qs =
     parentId != null ? `?parent_id=${encodeURIComponent(parentId)}` : '';
-  const rows = await request<PartCategory[]>(
-    baseUrl,
-    `/api/${API_VERSION}/vehicles/vehicle-search${qs}`,
-  );
+  const rows = await request<PartCategory[]>(baseUrl, `/categories${qs}`);
   return rows.map(mapCategory);
 }
 
@@ -220,7 +217,7 @@ export async function getParts(
 ): Promise<CatalogPartOption[]> {
   const rows = await request<CatalogPart[]>(
     baseUrl,
-    `/parts?category_id=${encodeURIComponent(categoryId)}`,
+    `/api/${API_VERSION}/parts?category_id=${encodeURIComponent(categoryId)}`,
   );
   return rows.map(mapPart);
 }

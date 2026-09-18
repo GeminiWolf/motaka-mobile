@@ -8,7 +8,10 @@ import { TrackedPartRow } from '../../components/parts/TrackedPartRow';
 import type { GarageStackParamList } from '../../navigation/types';
 import { useGarageStore } from '../../store/garageStore';
 import { colors, spacing } from '../../theme';
-import { prioritizeParts } from '../../utils/healthSummary';
+import {
+  getChecklistParts,
+  type ChecklistSort,
+} from '../../utils/filterChecklistParts';
 import { statusFromChecklistChecked } from '../../utils/partsChecklistStatus';
 import { Card } from '../../components/common/Card';
 import { Search } from 'lucide-react-native';
@@ -63,6 +66,9 @@ const sortOptions: DropdownOption[] = SORTS.map(sort => ({
 
 export function PartsChecklistScreen({ navigation, route }: Props) {
   const [search, setSearch] = useState('');
+  const [priority, setPriority] = useState<PartPriority | 'all'>('all');
+  const [status, setStatus] = useState<PartStatus | 'all'>('all');
+  const [sort, setSort] = useState<ChecklistSort>('priority');
   const debouncedSearch = useDebounce(search, 500);
 
   const { vehicleId } = route.params;
@@ -77,18 +83,29 @@ export function PartsChecklistScreen({ navigation, route }: Props) {
     [trackedParts, vehicleId],
   );
 
-  const checklist = useMemo(() => {
-    const query = debouncedSearch.trim().toLowerCase();
-    const filtered = query
-      ? parts.filter(
-          p =>
-            p.name.toLowerCase().includes(query) ||
-            p.partNumber.toLowerCase().includes(query) ||
-            p.category.toLowerCase().includes(query),
-        )
-      : parts;
-    return prioritizeParts(filtered);
-  }, [parts, debouncedSearch]);
+  const checklist = useMemo(
+    () =>
+      getChecklistParts(parts, {
+        query: debouncedSearch,
+        priority,
+        status,
+        sort,
+      }),
+    [parts, debouncedSearch, priority, status, sort],
+  );
+
+  const hasActiveFilters =
+    search.trim() !== '' ||
+    priority !== 'all' ||
+    status !== 'all' ||
+    sort !== 'priority';
+
+  const clearFilters = () => {
+    setSearch('');
+    setPriority('all');
+    setStatus('all');
+    setSort('priority');
+  };
 
   const handlePartCheckedChange = (partId: string, checked: boolean) => {
     updateTrackedPart(partId, { status: statusFromChecklistChecked(checked) });
@@ -117,10 +134,10 @@ export function PartsChecklistScreen({ navigation, route }: Props) {
               Budget
             </Text>
             <View style={styles.budgetAmount}>
-              <Text weight="semibold" size="xl">
+              <Text weight="semibold" size="xl" style={styles.tabularNums}>
                 {formatMoney(totalNeeded, currency)}
               </Text>
-              <Text tone="accent">{`/ ${formatMoney(
+              <Text tone="accent" style={styles.tabularNums}>{`/ ${formatMoney(
                 monthlyBudget,
                 currency,
               )}`}</Text>
@@ -132,6 +149,7 @@ export function PartsChecklistScreen({ navigation, route }: Props) {
               transform="uppercase"
               tone="accent"
               weight="bold"
+              style={styles.tabularNums}
             >{`${usagePercent.toFixed(0)}% Procured`}</Text>
           </View>
         </View>
@@ -148,16 +166,22 @@ export function PartsChecklistScreen({ navigation, route }: Props) {
             placeholder="Priority"
             style={styles.dropdown}
             items={prioritiesOptions}
+            value={priority}
+            onChange={value => setPriority(value as PartPriority | 'all')}
           />
           <Dropdown
             placeholder="Status"
             style={styles.dropdown}
             items={statusOptions}
+            value={status}
+            onChange={value => setStatus(value as PartStatus | 'all')}
           />
           <Dropdown
             placeholder="Sort"
             style={styles.dropdown}
             items={sortOptions}
+            value={sort}
+            onChange={value => setSort(value as ChecklistSort)}
           />
         </View>
       </View>
@@ -180,12 +204,25 @@ export function PartsChecklistScreen({ navigation, route }: Props) {
           />
         )}
         ListEmptyComponent={
-          <EmptyState
-            title="No parts tracked yet"
-            subtitle="Add the parts this car still needs."
-            actionLabel="Add part"
-            onAction={() => navigation.navigate('AddPart', { vehicleId })}
-          />
+          parts.length === 0 ? (
+            <EmptyState
+              title="No parts tracked yet"
+              subtitle="Add the parts this car still needs."
+              actionLabel="Add part"
+              onAction={() => navigation.navigate('AddPart', { vehicleId })}
+            />
+          ) : (
+            <EmptyState
+              title="No matching parts"
+              subtitle="Try a different search or filter."
+              actionLabel={hasActiveFilters ? 'Clear filters' : 'Add part'}
+              onAction={
+                hasActiveFilters
+                  ? clearFilters
+                  : () => navigation.navigate('AddPart', { vehicleId })
+              }
+            />
+          )
         }
       />
     </Screen>
@@ -240,5 +277,8 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     flex: 1,
+  },
+  tabularNums: {
+    fontVariant: ['tabular-nums'],
   },
 });

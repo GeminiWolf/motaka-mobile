@@ -1,20 +1,20 @@
 import React, {useEffect, useState} from 'react';
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Button} from '../../components/common/Button';
 import { Chip } from '../../components/common/Chip';
+import {Input} from '../../components/common/Input';
 import {NestedCategorySheet} from '../../components/common/NestedCategorySheet';
 import {SectionHeader} from '../../components/common/SectionHeader';
+import {SkeletonList} from '../../components/common/Skeleton';
+import {Text} from '../../components/common/Text';
 import type {GarageStackParamList} from '../../navigation/types';
 import {getParts} from '../../services/api';
 import {useGarageStore} from '../../store/garageStore';
@@ -26,13 +26,14 @@ import type {
 } from '../../types';
 import {formatCategoryPath} from '../../utils/formatCategoryPath';
 import {getCatalogPartDefaults} from '../../utils/getCatalogPartDefaults';
-import { colors, radius, spacing, typography } from '../../theme';
+import { colors, radius, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'AddPart'>;
 type Tab = 'browse' | 'manual';
 
 const PRIORITIES: PartPriority[] = ['urgent', 'soon', 'someday'];
 const STATUSES: PartStatus[] = ['needed', 'sourcing', 'ordered', 'installed'];
+const SAVE_VALIDATION_ERROR = 'Name and part number are required.';
 
 export function AddPartScreen({navigation, route}: Props) {
   const { vehicleId } = route.params;
@@ -111,7 +112,7 @@ export function AddPartScreen({navigation, route}: Props) {
 
   const save = () => {
     if (!name.trim() || !partNumber.trim()) {
-      setError('Name and part number are required.');
+      setError(SAVE_VALIDATION_ERROR);
       return;
     }
     const id = addTrackedPart({
@@ -132,6 +133,10 @@ export function AddPartScreen({navigation, route}: Props) {
     formatCategoryPath(categoryPath) ||
     selectedCategory?.name ||
     'Choose category';
+  const canRetryLoad =
+    error !== '' &&
+    error !== SAVE_VALIDATION_ERROR &&
+    selectedCategory != null;
 
   return (
     <View style={styles.root}>
@@ -143,7 +148,7 @@ export function AddPartScreen({navigation, route}: Props) {
               style={[styles.tab, tab === t && styles.tabActive]}
               onPress={() => setTab(t)}
             >
-              <Text style={styles.tabText}>
+              <Text variant="caption" transform="capitalize">
                 {t === 'browse' ? 'Browse' : 'Manual'}
               </Text>
             </Pressable>
@@ -155,33 +160,59 @@ export function AddPartScreen({navigation, route}: Props) {
           style={styles.flex}
         >
           <ScrollView style={styles.flex}>
-            {error ? <Text style={styles.error}>{error}</Text> : null}
+            {error ? (
+              <View style={styles.errorRow}>
+                <Text variant="caption" tone="danger" style={styles.error}>
+                  {error}
+                </Text>
+                {canRetryLoad ? (
+                  <Button
+                    label="Retry"
+                    variant="ghost"
+                    size="sm"
+                    onPress={() => {
+                      if (selectedCategory == null) {
+                        return;
+                      }
+                      loadByCategory(selectedCategory, categoryPath);
+                    }}
+                  />
+                ) : null}
+              </View>
+            ) : null}
 
             {tab === 'browse' ? (
               <View style={styles.block}>
-                <Text style={styles.hint}>Browse parts by category</Text>
+                <Text variant="caption" tone="muted">
+                  Browse parts by category
+                </Text>
                 <Pressable
                   style={styles.categoryField}
                   onPress={() => setCategorySheetOpen(true)}
                 >
-                  <Text style={styles.fieldLabel}>Category</Text>
-                  <Text style={styles.categoryValue}>{categoryLabel}</Text>
+                  <Text variant="label" tone="muted" transform="uppercase">
+                    Category
+                  </Text>
+                  <Text>{categoryLabel}</Text>
                 </Pressable>
 
                 {selectedCategory ? (
-                  <TextInput
-                    style={styles.input}
+                  <Input
                     placeholder="Filter by name"
-                    placeholderTextColor={colors.textDim}
                     value={query}
                     onChangeText={setQuery}
                     accessibilityLabel="Filter catalog parts by name"
                   />
                 ) : null}
                 {loading ? (
-                  <ActivityIndicator color={colors.accent} />
+                  <SkeletonList count={5} />
                 ) : selectedCategory && results.length === 0 ? (
-                  <Text style={styles.emptyResults}>
+                  <Text
+                    variant="caption"
+                    tone="muted"
+                    align="center"
+                    style={styles.emptyResults}
+                  >
                     No parts in this category match your search.
                   </Text>
                 ) : (
@@ -195,7 +226,7 @@ export function AddPartScreen({navigation, route}: Props) {
                       ]}
                       onPress={() => setSelectedCatalog(part)}
                     >
-                      <Text style={styles.resultName}>{part.name}</Text>
+                      <Text variant="subtitle">{part.name}</Text>
                     </Pressable>
                   ))
                 )}
@@ -208,25 +239,45 @@ export function AddPartScreen({navigation, route}: Props) {
                   title="Details"
                   subtitle="Priority, notes, estimate"
                 />
-                <Field label="Name" value={name} onChangeText={setName} />
-                <Field
+                <Input
+                  label="Name"
+                  value={name}
+                  onChangeText={setName}
+                  containerStyle={styles.field}
+                />
+                <Input
                   label="Part number"
                   value={partNumber}
                   onChangeText={setPartNumber}
+                  containerStyle={styles.field}
                 />
-                <Field
+                <Input
                   label="Category"
                   value={category}
                   onChangeText={setCategory}
+                  containerStyle={styles.field}
                 />
-                <Field
+                <Input
                   label="Estimated cost"
                   value={estimatedCost}
                   onChangeText={setEstimatedCost}
                   keyboardType="decimal-pad"
+                  containerStyle={styles.field}
                 />
-                <Field label="Notes" value={notes} onChangeText={setNotes} />
-                <Text style={styles.fieldLabel}>Priority</Text>
+                <Input
+                  label="Notes"
+                  value={notes}
+                  onChangeText={setNotes}
+                  containerStyle={styles.field}
+                />
+                <Text
+                  variant="label"
+                  tone="muted"
+                  transform="uppercase"
+                  style={styles.chipLabel}
+                >
+                  Priority
+                </Text>
                 <View style={styles.chips}>
                   {PRIORITIES.map(p => (
                     <Chip
@@ -237,7 +288,14 @@ export function AddPartScreen({navigation, route}: Props) {
                     />
                   ))}
                 </View>
-                <Text style={styles.fieldLabel}>Status</Text>
+                <Text
+                  variant="label"
+                  tone="muted"
+                  transform="uppercase"
+                  style={styles.chipLabel}
+                >
+                  Status
+                </Text>
                 <View style={styles.chips}>
                   {STATUSES.map(s => (
                     <Chip
@@ -261,31 +319,6 @@ export function AddPartScreen({navigation, route}: Props) {
         selectedId={selectedCategory?.id}
         onClose={() => setCategorySheetOpen(false)}
         onSelect={loadByCategory}
-      />
-    </View>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChangeText,
-  keyboardType,
-}: {
-  label: string;
-  value: string;
-  onChangeText: (v: string) => void;
-  keyboardType?: 'default' | 'decimal-pad';
-}) {
-  return (
-    <View style={{marginBottom: spacing.sm}}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      <TextInput
-        style={styles.input}
-        value={value}
-        onChangeText={onChangeText}
-        placeholderTextColor={colors.textDim}
-        keyboardType={keyboardType}
       />
     </View>
   );
@@ -319,28 +352,10 @@ const styles = StyleSheet.create({
   tabActive: {
     backgroundColor: colors.accentSoft,
   },
-  tabText: {
-    ...typography.caption,
-    color: colors.text,
-    textTransform: 'capitalize',
-  },
   block: {
     flex: 1,
     marginBottom: spacing.lg,
     gap: spacing.sm,
-  },
-  form: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-  input: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    color: colors.text,
   },
   categoryField: {
     backgroundColor: colors.surface,
@@ -348,29 +363,26 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radius.md,
     padding: spacing.md,
-  },
-  categoryValue: {
-    ...typography.body,
-    color: colors.text,
-  },
-  hint: {
-    ...typography.caption,
-    color: colors.textMuted,
+    gap: 4,
   },
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
+  chipLabel: {
+    marginBottom: 4,
+  },
   emptyResults: {
-    ...typography.caption,
-    color: colors.textMuted,
-    textAlign: 'center',
     paddingVertical: spacing.lg,
   },
-  error: {
-    ...typography.caption,
-    color: colors.danger,
+  errorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     marginBottom: spacing.sm,
+  },
+  error: {
+    flex: 1,
   },
   result: {
     backgroundColor: colors.surface,
@@ -383,14 +395,7 @@ const styles = StyleSheet.create({
   resultSelected: {
     borderColor: colors.accent,
   },
-  resultName: {
-    ...typography.subtitle,
-    color: colors.text,
-  },
-  fieldLabel: {
-    ...typography.label,
-    color: colors.textMuted,
-    marginBottom: 4,
-    textTransform: 'uppercase',
+  field: {
+    marginBottom: spacing.sm,
   },
 });

@@ -102,17 +102,13 @@ export type VariantOption = {
 export type PartCategory = {
   id: number;
   name: string;
-  parentId?: string;
+  parent_id?: number | null;
 };
 
 export type PartCategoryOption = {
   id: string;
   name: string;
 } & Omit<PartCategory, 'id'>;
-
-export enum Brand {
-  SeedCatalog = 'Seed Catalog',
-}
 
 export interface PartCategories {
   id: number;
@@ -126,7 +122,7 @@ export type CatalogPart = {
   name: string;
   slug: string;
   part_number: string;
-  brand: Brand;
+  brand?: string;
   description: string;
   is_oem: boolean;
   is_active: boolean;

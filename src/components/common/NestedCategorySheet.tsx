@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Modal,
   Pressable,
@@ -13,8 +12,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getCategories } from '../../services/api';
 import type { PartCategoryOption } from '../../types';
 import { formatCategoryPath } from '../../utils/formatCategoryPath';
-import { colors, radius, spacing, typography } from '../../theme';
+import { colors, fontFamily, radius, spacing, typography } from '../../theme';
 import { WINDOW_HEIGHT } from '../../utils/device';
+import { Button } from './Button';
+import { SkeletonList } from './Skeleton';
 
 type Props = {
   visible: boolean;
@@ -37,6 +38,7 @@ export function NestedCategorySheet({
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
 
   const parentId = path.length > 0 ? path[path.length - 1].id : undefined;
 
@@ -76,7 +78,7 @@ export function NestedCategorySheet({
     return () => {
       cancelled = true;
     };
-  }, [visible, baseUrl, parentId]);
+  }, [visible, baseUrl, parentId, reloadKey]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -193,9 +195,19 @@ export function NestedCategorySheet({
             accessibilityLabel="Search categories"
           />
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? (
+            <View style={styles.errorRow}>
+              <Text style={styles.error}>{error}</Text>
+              <Button
+                label="Retry"
+                variant="ghost"
+                size="sm"
+                onPress={() => setReloadKey(key => key + 1)}
+              />
+            </View>
+          ) : null}
           {loading ? (
-            <ActivityIndicator color={colors.accent} style={styles.loader} />
+            <SkeletonList />
           ) : (
             <FlatList
               data={filtered}
@@ -307,7 +319,7 @@ const styles = StyleSheet.create({
   useCurrentText: {
     ...typography.caption,
     color: colors.accent,
-    fontWeight: '700',
+    fontFamily: fontFamily.bold,
   },
   search: {
     backgroundColor: colors.bg,
@@ -317,10 +329,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     color: colors.text,
+    fontFamily: fontFamily.regular,
     marginBottom: spacing.sm,
-  },
-  loader: {
-    marginTop: spacing.lg,
   },
   list: {
     flex: 1,
@@ -331,10 +341,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: spacing.xl,
   },
+  errorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
   error: {
     ...typography.caption,
     color: colors.danger,
-    marginBottom: spacing.sm,
+    flex: 1,
   },
   option: {
     flexDirection: 'row',
@@ -358,7 +375,7 @@ const styles = StyleSheet.create({
   },
   optionTextSelected: {
     color: colors.accent,
-    fontWeight: '600',
+    fontFamily: fontFamily.semibold,
   },
   chevron: {
     ...typography.title,

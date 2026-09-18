@@ -31,6 +31,7 @@ export function VehicleCard({ vehicle, parts, onPress }: Props) {
       accessibilityRole="button"
       accessibilityLabel={`${title}, ${health.summary}`}
       accessibilityHint="Opens car dashboard"
+      style={({ pressed }) => pressed && styles.pressed}
     >
       <Card style={styles.card} padding={spacing.xl}>
         <View style={styles.content}>
@@ -54,7 +55,11 @@ export function VehicleCard({ vehicle, parts, onPress }: Props) {
           </View>
           <View style={styles.costContent}>
             <Text size="xs">Estimated Cost</Text>
-            <Text tone="accent" weight="semibold">
+            <Text
+              tone="accent"
+              weight="semibold"
+              style={styles.tabularNums}
+            >
               {formatMoney(totalEstimatedCost, currency)}
             </Text>
           </View>
@@ -66,9 +71,9 @@ export function VehicleCard({ vehicle, parts, onPress }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.slate800,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.slate500,
+    borderColor: colors.borderSubtle,
   },
   content: {
     flexDirection: 'row',
@@ -123,5 +128,8 @@ const styles = StyleSheet.create({
   costContent: {
     alignItems: 'flex-end',
     gap: 2,
+  },
+  tabularNums: {
+    fontVariant: ['tabular-nums'],
   },
 });

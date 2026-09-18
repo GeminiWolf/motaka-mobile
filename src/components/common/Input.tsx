@@ -7,7 +7,7 @@ import {
   type TextInputProps as RNTextInputProps,
   type ViewStyle,
 } from 'react-native';
-import { colors, radius as themeRadius, spacing } from '../../theme';
+import { colors, fontFamily, radius as themeRadius, spacing } from '../../theme';
 import { Text } from './Text';
 
 type Padding = 'none' | 'sm' | 'md' | 'lg';
@@ -190,6 +190,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     color: colors.text,
+    fontFamily: fontFamily.regular,
   },
   caption: {
     marginTop: spacing.xs,

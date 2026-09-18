@@ -54,13 +54,20 @@ export const radius = {
   xl: 20,
 };
 
+export const fontFamily = {
+  regular: 'Outfit-Regular',
+  medium: 'Outfit-Medium',
+  semibold: 'Outfit-SemiBold',
+  bold: 'Outfit-Bold',
+};
+
 export const typography = {
-  hero: { fontSize: 28, fontWeight: '700', letterSpacing: -0.5 } as TextStyle,
-  title: { fontSize: 20, fontWeight: '700', letterSpacing: -0.3 } as TextStyle,
-  subtitle: { fontSize: 15, fontWeight: '600' } as TextStyle,
-  body: { fontSize: 14, fontWeight: '400' } as TextStyle,
-  caption: { fontSize: 12, fontWeight: '500' } as TextStyle,
-  label: { fontSize: 11, fontWeight: '700', letterSpacing: 0.4 } as TextStyle,
+  hero: { fontFamily: fontFamily.bold, fontSize: 30, letterSpacing: -0.6 } as TextStyle,
+  title: { fontFamily: fontFamily.bold, fontSize: 20, letterSpacing: -0.3 } as TextStyle,
+  subtitle: { fontFamily: fontFamily.semibold, fontSize: 15 } as TextStyle,
+  body: { fontFamily: fontFamily.regular, fontSize: 14 } as TextStyle,
+  caption: { fontFamily: fontFamily.medium, fontSize: 12 } as TextStyle,
+  label: { fontFamily: fontFamily.bold, fontSize: 11, letterSpacing: 0.6 } as TextStyle,
   mono: {
     fontSize: 12,
     fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace' }),
@@ -70,7 +77,7 @@ export const typography = {
 export const shadows = {
   soft: Platform.select({
     ios: {
-      shadowColor: '#000',
+      shadowColor: colors.bg,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.18,
       shadowRadius: 12,
@@ -79,4 +86,4 @@ export const shadows = {
   }),
 };
 
-export const theme = { colors, spacing, radius, typography, shadows };
+export const theme = { colors, spacing, radius, fontFamily, typography, shadows };

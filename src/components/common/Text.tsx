@@ -4,7 +4,7 @@ import {
   type TextProps as RNTextProps,
   type TextStyle,
 } from 'react-native';
-import { colors, typography } from '../../theme';
+import { colors, fontFamily, typography } from '../../theme';
 
 export type TextVariant =
   | 'hero'
@@ -62,11 +62,11 @@ export const TEXT_SIZES: Record<TextSize, number> = {
   '3xl': 28,
 };
 
-export const TEXT_WEIGHTS: Record<TextWeight, TextStyle['fontWeight']> = {
-  regular: '400',
-  medium: '500',
-  semibold: '600',
-  bold: '700',
+export const TEXT_WEIGHTS: Record<TextWeight, string> = {
+  regular: fontFamily.regular,
+  medium: fontFamily.medium,
+  semibold: fontFamily.semibold,
+  bold: fontFamily.bold,
 };
 
 export const TEXT_LEADING: Record<TextLeading, number> = {
@@ -130,7 +130,7 @@ export function Text({
         typography[variant],
         { color: TONE_COLOR[tone] },
         size != null && { fontSize: TEXT_SIZES[size] },
-        weight != null && { fontWeight: TEXT_WEIGHTS[weight] },
+        weight != null && { fontFamily: TEXT_WEIGHTS[weight] },
         (align != null || center) && {
           textAlign: align ?? (center ? 'center' : undefined),
         },

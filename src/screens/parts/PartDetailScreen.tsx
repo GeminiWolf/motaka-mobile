@@ -1,21 +1,17 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {
-  Alert,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import {Alert, StyleSheet, View} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Button} from '../../components/common/Button';
 import {Chip} from '../../components/common/Chip';
 import {EmptyState} from '../../components/common/EmptyState';
+import {Input} from '../../components/common/Input';
 import {Screen} from '../../components/common/Screen';
 import {SectionHeader} from '../../components/common/SectionHeader';
+import {Text} from '../../components/common/Text';
 import type {GarageStackParamList} from '../../navigation/types';
 import {useGarageStore} from '../../store/garageStore';
 import type {PartPriority, PartStatus} from '../../types';
-import {colors, radius, spacing, typography} from '../../theme';
+import {spacing} from '../../theme';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'PartDetail'>;
 
@@ -128,11 +124,19 @@ export function PartDetailScreen({navigation, route}: Props) {
     <Screen scroll>
       <View style={styles.headerRow}>
         <View style={styles.headerText}>
-          <Text style={styles.title}>{part.name}</Text>
-          <Text style={styles.number}>#{part.partNumber}</Text>
-          <Text style={styles.meta}>{part.category}</Text>
+          <Text variant="hero">{part.name}</Text>
+          <Text variant="mono" tone="muted" style={styles.number}>
+            #{part.partNumber}
+          </Text>
+          <Text variant="caption" tone="dim">
+            {part.category}
+          </Text>
         </View>
-        {savedVisible ? <Text style={styles.saved}>Saved</Text> : null}
+        {savedVisible ? (
+          <Text variant="caption" tone="accent" weight="semibold">
+            Saved
+          </Text>
+        ) : null}
       </View>
 
       <SectionHeader title="Status" subtitle="Tap to update" />
@@ -165,27 +169,31 @@ export function PartDetailScreen({navigation, route}: Props) {
         ))}
       </View>
 
-      <Field
+      <Input
         label="Estimated cost"
         value={draft.estimatedCost}
         onChangeText={v => updateDraftField('estimatedCost', v)}
         keyboardType="decimal-pad"
+        containerStyle={styles.field}
       />
-      <Field
+      <Input
         label="Actual cost"
         value={draft.actualCost}
         onChangeText={v => updateDraftField('actualCost', v)}
         keyboardType="decimal-pad"
+        containerStyle={styles.field}
       />
-      <Field
+      <Input
         label="Source"
         value={draft.source}
         onChangeText={v => updateDraftField('source', v)}
+        containerStyle={styles.field}
       />
-      <Field
+      <Input
         label="Notes"
         value={draft.notes}
         onChangeText={v => updateDraftField('notes', v)}
+        containerStyle={styles.field}
       />
 
       <Button
@@ -210,32 +218,6 @@ export function PartDetailScreen({navigation, route}: Props) {
   );
 }
 
-function Field({
-  label,
-  value,
-  onChangeText,
-  keyboardType,
-}: {
-  label: string;
-  value: string;
-  onChangeText: (v: string) => void;
-  keyboardType?: 'default' | 'decimal-pad';
-}) {
-  return (
-    <View style={{marginBottom: spacing.sm}}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      <TextInput
-        style={styles.input}
-        value={value}
-        onChangeText={onChangeText}
-        placeholderTextColor={colors.textDim}
-        keyboardType={keyboardType}
-        accessibilityLabel={label}
-      />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
@@ -247,42 +229,15 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: spacing.md,
   },
-  title: {
-    ...typography.hero,
-    color: colors.text,
-  },
   number: {
-    ...typography.mono,
-    color: colors.textMuted,
     marginTop: 4,
-  },
-  meta: {
-    ...typography.caption,
-    color: colors.textDim,
-  },
-  saved: {
-    ...typography.caption,
-    color: colors.accent,
-    fontWeight: '600',
   },
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginBottom: spacing.md,
   },
-  fieldLabel: {
-    ...typography.label,
-    color: colors.textMuted,
-    marginBottom: 4,
-    textTransform: 'uppercase',
-  },
-  input: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    color: colors.text,
+  field: {
+    marginBottom: spacing.sm,
   },
 });

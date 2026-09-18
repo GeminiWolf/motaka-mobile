@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, radius, spacing, typography } from '../../theme';
+import { colors, fontFamily, radius, spacing, typography } from '../../theme';
 import { WINDOW_HEIGHT } from '../../utils/device';
 import ButtonIcon from './ButtonIcon';
 
@@ -186,6 +186,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     color: colors.text,
+    fontFamily: fontFamily.regular,
     marginBottom: spacing.sm,
   },
   list: {
@@ -214,6 +215,6 @@ const styles = StyleSheet.create({
   },
   optionTextSelected: {
     color: colors.accent,
-    fontWeight: '600',
+    fontFamily: fontFamily.semibold,
   },
 });

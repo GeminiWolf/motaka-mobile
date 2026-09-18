@@ -16,7 +16,7 @@ import type {GarageStackParamList} from '../../navigation/types';
 import {useGarageStore} from '../../store/garageStore';
 import type {PartPriority, PartStatus} from '../../types';
 import {prioritizeParts} from '../../utils/healthSummary';
-import {colors, radius, shadows, spacing, typography} from '../../theme';
+import {colors, fontFamily, radius, shadows, spacing, typography} from '../../theme';
 
 type Props = NativeStackScreenProps<GarageStackParamList, 'PartsTracker'>;
 type FilterKind = 'status' | 'priority' | 'category';
@@ -396,6 +396,6 @@ const styles = StyleSheet.create({
   },
   optionTextSelected: {
     color: colors.accent,
-    fontWeight: '600',
+    fontFamily: fontFamily.semibold,
   },
 });

@@ -6,6 +6,7 @@ import { colors, radius, spacing, typography } from '../../theme';
 import { Checkbox } from '../common/Checkbox';
 import { Text } from '../common/Text';
 import { PriorityBadge } from './PriorityBadge';
+import { StatusBadge } from './StatusBadge';
 
 type Props = {
   part: TrackedPart;
@@ -57,9 +58,7 @@ export function TrackedPartRow({
       </View>
       <View style={styles.right}>
         <Text style={styles.cost}>{cost}</Text>
-        <Text tone="dim" transform="capitalize">
-          {part.status}
-        </Text>
+        <StatusBadge status={part.status} />
       </View>
     </Pressable>
   );
@@ -78,7 +77,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.slate800,
+    backgroundColor: colors.surface,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.borderSubtle,
@@ -122,5 +121,6 @@ const styles = StyleSheet.create({
   cost: {
     ...typography.caption,
     color: colors.accent,
+    fontVariant: ['tabular-nums'],
   },
 });

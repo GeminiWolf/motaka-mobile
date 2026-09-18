@@ -23,7 +23,7 @@ import {
   PartsTrackerScreen,
   SettingsScreen,
 } from '../screens';
-import { colors } from '../theme';
+import { colors, fontFamily } from '../theme';
 import Header from './components/Header';
 import { CarDashboardHeaderRight } from './components/CarDashboardHeaderRight';
 import { PartsChecklistHeaderRight } from './components/PartsChecklistHeaderRight';
@@ -116,7 +116,7 @@ export function RootNavigator() {
         screenOptions={{
           headerStyle: { backgroundColor: colors.surface },
           headerTintColor: colors.text,
-          headerTitleStyle: { fontWeight: '700' },
+          headerTitleStyle: { fontFamily: fontFamily.bold },
           contentStyle: { backgroundColor: colors.bg },
           headerBackButtonDisplayMode: 'minimal',
         }}
