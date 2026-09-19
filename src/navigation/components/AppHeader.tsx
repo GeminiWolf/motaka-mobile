@@ -51,7 +51,7 @@ export function AppHeader({ title, onBack, right }: AppHeaderProps) {
       ) : null}
       <View style={styles.title} accessibilityRole="header">
         {typeof title === 'string' ? (
-          <Text variant="subtitle" numberOfLines={1}>
+          <Text variant="subtitle" numberOfLines={1} size="xl">
             {title}
           </Text>
         ) : (
@@ -104,6 +104,8 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
     backgroundColor: colors.bg,
     minHeight: 44,
+    borderBottomColor: colors.borderSubtle,
+    borderBottomWidth: 1,
   },
   back: {
     minWidth: 44,
@@ -115,6 +117,7 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     minWidth: 0,
+    minHeight: 42,
     justifyContent: 'center',
   },
   right: {
@@ -124,7 +127,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   action: {
-    minHeight: 44,
+    minHeight: 32,
     justifyContent: 'center',
     alignItems: 'flex-end',
   },
