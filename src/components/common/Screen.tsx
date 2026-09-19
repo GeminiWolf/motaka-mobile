@@ -1,6 +1,8 @@
 import React, {ReactNode} from 'react';
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   View,
@@ -16,6 +18,10 @@ type Props = {
   style?: ViewStyle;
   contentStyle?: ViewStyle;
 };
+
+const KEYBOARD_BEHAVIOR = Platform.OS === 'ios' ? 'padding' : undefined;
+const KEYBOARD_DISMISS_MODE =
+  Platform.OS === 'ios' ? 'interactive' : 'on-drag';
 
 export function Screen({
   children,
@@ -38,8 +44,11 @@ export function Screen({
     return (
       <SafeAreaView style={[styles.safe, style]} edges={['left', 'right']}>
         <ScrollView
+          style={styles.flex}
           contentContainerStyle={[styles.content, contentStyle]}
-          keyboardShouldPersistTaps="handled">
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode={KEYBOARD_DISMISS_MODE}
+          automaticallyAdjustKeyboardInsets>
           {children}
         </ScrollView>
       </SafeAreaView>
@@ -48,7 +57,12 @@ export function Screen({
 
   return (
     <SafeAreaView style={[styles.safe, style]} edges={['left', 'right']}>
-      <View style={[styles.content, contentStyle]}>{children}</View>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={KEYBOARD_BEHAVIOR}
+        enabled={Platform.OS === 'ios'}>
+        <View style={[styles.content, contentStyle]}>{children}</View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -57,6 +71,9 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: colors.bg,
+  },
+  flex: {
+    flex: 1,
   },
   content: {
     flexGrow: 1,

@@ -85,9 +85,7 @@ export function VehiclePartsWorkspace({
       {header}
       <View style={styles.summary}>
         <Text size="sm" tone="muted">
-          {openCount === 0
-            ? 'Build is clear'
-            : `${openCount} still needed`}
+          {openCount === 0 ? 'Build is clear' : `${openCount} still needed`}
         </Text>
         <Text size="sm" tone="muted" style={tabularNums}>
           {formatMoney(totalNeeded, currency)}
@@ -101,13 +99,18 @@ export function VehiclePartsWorkspace({
             value={search}
             onChangeText={setSearch}
           />
-          <FilterTabs value={scope} options={SCOPE_OPTIONS} onChange={setScope} />
+          <FilterTabs
+            value={scope}
+            options={SCOPE_OPTIONS}
+            onChange={setScope}
+          />
         </View>
       ) : null}
       <FlatList
         keyExtractor={item => item.id}
         data={checklist}
-        contentContainerStyle={styles.list}
+        style={styles.list}
+        contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
           <TrackedPartRow
             part={item}
@@ -208,6 +211,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   list: {
+    flex: 1,
+  },
+  listContent: {
+    flex: 1,
     paddingHorizontal: layout.gutter,
     paddingBottom: spacing.xxl,
     flexGrow: 1,
